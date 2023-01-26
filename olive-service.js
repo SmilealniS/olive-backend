@@ -1,8 +1,4 @@
-const {
-    mongo,
-    MongoClient,
-    ObjectId
-} = require('mongodb');
+const { mongo, MongoClient, ObjectId } = require('mongodb');
 
 async function connection() {
     const url = "mongodb+srv://SmilealniS:sutorimu13@npm-olive.4z8itim.mongodb.net/?retryWrites=true&w=majority";
@@ -36,11 +32,9 @@ async function connection() {
         // });
 
         // Update list by id
-        await updateListById(mongoClient, "63d2cc29fa215746393a0bae", {
-            Name: "VSCodeUpdate"
-        });
-
-
+        // await updateListById(mongoClient, "63d2cc29fa215746393a0bae", {
+        //     Name: "VSCodeUpdate"
+        // });
     } catch (error) {
         console.error(error);
     } finally {
