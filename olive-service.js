@@ -1,11 +1,60 @@
 const { mongo, MongoClient, ObjectId } = require('mongodb');
 
+require('dotenv').config()
+const express = require('express')
+const bodyParser = require('body-parser')
+const crypto = require('crypto')
+const cors = require('cors')
+const KJUR = require('jsrsasign')
+
+const app = express()
+const port = process.env.PORT || 4000
+
+// ---------- zoom signature ----------
+
+app.use(bodyParser.json(), cors())
+app.options('*', cors())
+
+app.post('/', (req, res) => {
+
+  const iat = Math.round(new Date().getTime() / 1000) - 30;
+  const exp = iat + 60 * 60 * 2
+
+  const oHeader = { alg: 'HS256', typ: 'JWT' }
+
+  const oPayload = {
+    sdkKey: process.env.ZOOM_SDK_KEY,
+    mn: req.body.meetingNumber,
+    role: req.body.role,
+    iat: iat,
+    exp: exp,
+    appKey: process.env.ZOOM_SDK_KEY,
+    tokenExp: iat + 60 * 60 * 2
+  }
+
+  const sHeader = JSON.stringify(oHeader)
+  const sPayload = JSON.stringify(oPayload)
+  const signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, process.env.ZOOM_SDK_SECRET)
+
+  res.json({
+    signature: signature
+  })
+})
+
+app.listen(port, () => console.log(`Zoom Meeting SDK Sample Signature Node.js on port ${port}!`))
+
+// ---------- mongo ----------
+// connection().catch(console.error);
+
 async function connection() {
-    const url = "mongodb+srv://SmilealniS:sutorimu13@npm-olive.4z8itim.mongodb.net/?retryWrites=true&w=majority";
+    // const url = "mongodb+srv://SmilealniS:sutorimu13@npm-olive.4z8itim.mongodb.net/?retryWrites=true&w=majority";
+    // const url = "mongodb://SmilealniS:sutorimu13@mongo:27017/Olive";
+    // Admin
+    const url = "mongodb://root:ictoliveict@mongo:27017";
     const mongoClient = new MongoClient(url);
 
     try {
-        await mongoClient.connect();
+        // await mongoClient.connect();
 
         // List database
         // await listDatabases(mongoClient);
@@ -39,12 +88,11 @@ async function connection() {
 
     } catch (error) {
         console.error(error);
-    } finally {
+    }
+    finally {
         await mongoClient.close();
     }
 }
-
-connection().catch(console.error);
 
 async function createLists(mongoClient, newList) {
     const result = await mongoClient.db("Olive").collection("Identity").insertMany(newList);
