@@ -154,6 +154,7 @@ app.get('/olive/getIdentitybyId', async (req, res) => {
             ...message
         });
     }
+    console.log('====================');
 });
 
 // Find listing in collection 'Identity' matched all params
@@ -190,6 +191,7 @@ app.get('/olive/getIdentitybyParams', async (req, res) => {
             ...message
         });
     }
+    console.log('====================');
 });
 
 // Update list by id
