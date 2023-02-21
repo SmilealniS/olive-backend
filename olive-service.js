@@ -155,8 +155,6 @@ app.get('/olive/getIdentitybyId', async (req, res) => {
         });
     }
 });
-    console.log('====================');
-});
 
 // Find listing in collection 'Identity' matched all params
 app.get('/olive/getIdentitybyParams', async (req, res) => {
