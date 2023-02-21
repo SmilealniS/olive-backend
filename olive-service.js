@@ -155,6 +155,8 @@ app.get('/olive/getIdentitybyId', async (req, res) => {
         });
     }
 });
+    console.log('====================');
+});
 
 // Find listing in collection 'Identity' matched all params
 app.get('/olive/getIdentitybyParams', async (req, res) => {
@@ -196,6 +198,13 @@ app.get('/olive/getIdentitybyParams', async (req, res) => {
 app.put('/olive/updateIdentitybyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
+    console.log('====================');
+});
+
+// Update list by id
+app.put('/olive/updateIdentitybyId', async (req, res) => {
+    // Connect mongodb
+    await mongoClient.connect();
 
     const updatedList = req.body;
 
@@ -206,31 +215,28 @@ app.put('/olive/updateIdentitybyId', async (req, res) => {
             $set: updatedList
         });
 
-    let message;
-    try {
-        if (result.matchedCount > 0) {
-            if (result.modifiedCount > 0) message = { 'message': `id ${req.query._id} is updated!` };
-            else message = { 'message': `id ${req.query._id} is up to date...` };
-        }
-        else message = { 'message': `Not found id ${req.query._id}` };
-    } catch {
-        message = { 'message': `Not found id ${req.query._id}` };
-    }
-
-    res.send(message);
+    if (result.matchedCount > 0) {
+        res.send(result);
+    } else res.send(result);
 });
 
 // Delete list by id
-app.delete('/olive/deleteIdentitybyId', async (req, res) => {
+app.put('/olive/deleteIdentitybyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
-    const result = await mongoClient.db('olive').collection('Identity').deleteOne({ _id: ObjectId(req.query._id) });
+    const updatedList = req.body;
 
-    let message;
-    if (result.deletedCount > 0) message = { 'message': `id ${req.query._id} is deleted!` };
-    else message = { 'message': `Not found id ${req.query._id}` };
-    res.send(message);
+    const result = await mongoClient.db('olive').collection('Identity')
+        .deleteOne({
+            _id: ObjectId(req.query._id)
+        }, {
+            $set: updatedList
+        });
+
+    if (result.matchedCount > 0) {
+        res.send(result);
+    } else res.send(result);
 });
 
-app.listen(port, () => console.log(`Now running on port ${port}...`));
+app.listen(port, () => console.log(`Now running on port ${port}...`))
