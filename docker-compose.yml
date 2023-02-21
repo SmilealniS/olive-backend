@@ -1,0 +1,32 @@
+version: '3'
+services:
+  olive-backend:
+    restart: always
+    tty: true
+    # entrypoint: ['node']
+    image: node:18-buster
+    ports:
+      - 43334:3030
+    volumes:
+      - /home/anyamaneeama/olive-backend:/app
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - /home/anyamaneeama/olive-backend/mongodb:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ictoliveict
+      MONGO_INITDB_USERNAME: SmilealniS
+      MONGO_INITDB_PASSWORD: sutorimu13
+      MONGO_INITDB_DATABASE: Olive
+    # networks:
+      # - node-webapp-network
+      # mongodb+srv://SmilealniS:<password>@npm-olive.4z8itim.mongodb.net/test
+# networks:
+#   node-webapp-network:
+#     driver: bridge
+#volumes:
+#  mongodb:
