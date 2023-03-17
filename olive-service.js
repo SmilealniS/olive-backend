@@ -1,4 +1,4 @@
-const { mongo, MongoClient, ObjectId, Db, Timestamp } = require('mongodb');
+const { mongo, MongoClient, ObjectId } = require('mongodb');
 
 require('dotenv').config()
 const express = require('express')
@@ -15,7 +15,7 @@ const port = process.env.PORT || 4000
 app.use(bodyParser.json(), cors())
 app.options('*', cors())
 
-app.post('/', (req, res) => {
+app.post('/zoom', (req, res) => {
 
     const iat = Math.round(new Date().getTime() / 1000) - 30;
     const exp = iat + 60 * 60 * 2
@@ -128,12 +128,41 @@ app.post('/olive/identity/create', async (req, res) => {
     res.send(result);
 });
 
+// Find all listing in collection 'Identity'
+app.get('/olive/identity/getAll', async (req, res) => {
+    // Connect mongodb
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Identity').find({}).toArray();
+
+    if (result) {
+        console.log(`Name: ${result.Name}
+                    Surname: ${result.Surname}
+                    Telephone: ${result.Telephone}
+                    Username: ${result.Username}
+                    Password: ${result.Password}
+                    Teacher_Profile: ${result.Teacher_Profile}
+                    Admin_Profile: ${result.Admin_Profile}
+                    Student_Profile: ${result.Student_Profile}`);
+        res.send({
+            ...result
+        });
+    } else {
+        let message = { 'message': `No listings found in collection 'Identity'` };
+        console.log(message.message);
+        res.send({
+            ...result,
+            ...message
+        });
+    }
+});
+
 // Find listing in collection 'Identity' matched 'ObjectId'
 app.get('/olive/identity/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
-    const result = await mongoClient.db('olive').collection('Identity').find({
+    const result = await mongoClient.db('olive').collection('Identity').findOne({
         _id: ObjectId(req.query._id)
     });
 
@@ -264,6 +293,35 @@ app.delete('/olive/identity/deletebyId', async (req, res) => {
     } else res.send(result);
 });
 
+// Login as
+
+app.post('/', async (req, res) => {
+    await mongoClient.connect();
+
+    const user = await mongoClient.db('olive').collection('Identity').findOne({ Username: req.body.username });
+
+    if (user) {
+        const result = req.body.password === user.Password;
+
+        if (result) {
+            if (user.Teacher_Profile == '' && user.Admin_Profile == '') {
+                res.status(200).send({
+                    ...user,
+                    ...{ role: 'student' }
+                });
+            } else if (user.Teacher_Profile == '') res.status(200).send({
+                ...user,
+                ...{ role: 'admin' }
+            });
+            else res.status(200).send({
+                ...user,
+                ...{ role: 'teacher' }
+            });
+
+        } else res.status(400).json({ error: "Password doesn't match" });
+    } else res.status(400).json({ error: "User doesn't match" });
+});
+
 // Student_Profile
 
 // Create lists in collection 'Student_Profile' in database 'olive'
@@ -312,8 +370,9 @@ app.get('/olive/student-profile/getAll', async (req, res) => {
 app.get('/olive/student-profile/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
+    console.log(req)
 
-    const result = await mongoClient.db('olive').collection('Student_Profile').find({
+    const result = await mongoClient.db('olive').collection('Student_Profile').findOne({
         _id: ObjectId(req.query._id)
     });
 
@@ -420,12 +479,35 @@ app.post('/olive/teacher-profile/create', async (req, res) => {
     res.send(result);
 });
 
+// Find all listing in collection 'Teacher_Profile'
+app.get('/olive/teacher-profile/getAll', async (req, res) => {
+    // Connect mongodb
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Teacher_Profile').find({}).toArray();
+
+    if (result) {
+        console.log(`_id: ${result._id}
+        Display_Name: ${result.Display_Name}`);
+        res.send({
+            ...result
+        });
+    } else {
+        let message = { 'message': `No listings found in collection 'Teacher_Profile'` };
+        console.log(message.message);
+        res.send({
+            ...result,
+            ...message
+        });
+    }
+});
+
 // Find listing in collection 'Teacher_Profile' matched 'ObjectId'
 app.get('/olive/teacher-profile/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
-    const result = await mongoClient.db('olive').collection('Teacher_Profile').find({
+    const result = await mongoClient.db('olive').collection('Teacher_Profile').findOne({
         _id: ObjectId(req.query._id)
     });
 
@@ -532,12 +614,35 @@ app.post('/olive/admin-profile/create', async (req, res) => {
     res.send(result);
 });
 
+// Find all listing in collection 'Admin_Profile'
+app.get('/olive/admin-profile/getAll', async (req, res) => {
+    // Connect mongodb
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Admin_Profile').find({}).toArray();
+
+    if (result) {
+        console.log(`_id: ${result._id}
+        Display_Name: ${result.Display_Name}`);
+        res.send({
+            ...result
+        });
+    } else {
+        let message = { 'message': `No listings found in collection 'Admin_Profile'` };
+        console.log(message.message);
+        res.send({
+            ...result,
+            ...message
+        });
+    }
+});
+
 // Find listing in collection 'Admin_Profile' matched 'ObjectId'
 app.get('/olive/admin-profile/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
-    const result = await mongoClient.db('olive').collection('Admin_Profile').find({
+    const result = await mongoClient.db('olive').collection('Admin_Profile').findOne({
         _id: ObjectId(req.query._id)
     });
 
@@ -679,7 +784,7 @@ app.get('/olive/attendance/getbyStudentId', async (req, res) => {
             Class End: ${result.Class.ExitTime}`);
         });
         res.send({
-            ...results,
+            ...{result: results},
             ...message
         });
     } else {
@@ -773,7 +878,8 @@ app.put('/olive/attendance/updatebyId', async (req, res) => {
 
     const result = await mongoClient.db('olive').collection('Attendance')
         .updateOne({
-            _id: ObjectId(req.query._id)
+            _id: ObjectId(req.query._id),
+            // "Class._id": ObjectId(req.query.class)
         }, {
             $set: updatedList
         });
@@ -841,7 +947,65 @@ app.delete('/olive/attendance/deletebyId', async (req, res) => {
 
 // Engagement <NOT YET>
 
-// 
+app.post('/olive/engagement', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const engagement = {
+        Student_Id: req.body.Student_Id,
+        Class: {
+            Id: req.body.Class.Id,
+            Date: new Date(req.body.Class.Date),
+            Engagement: 0
+        },
+        Interaction_Log: req.body.Interaction_Log
+    };
+
+    console.log(engagement);
+
+    const result = await mongoClient.db('olive').collection('Engagement').insertOne(engagement);
+    console.log(result);
+
+    res.send(result);
+});
+
+app.get('/olive/engagement/getAll', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const results = await mongoClient.db('olive').collection('Engagement').find({}).toArray();
+    console.log(results);
+
+    res.send(results);
+});
+
+app.put('/olive/engagement/addLog', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const log = req.body;
+
+    const engagement = await mongoClient.db('olive').collection('Engagement').findOne({
+        Student_Id: req.query.student,
+        "Class.Id": req.query.class
+    });
+    console.log(engagement.Interaction_Log.push(log.Interaction_Log));
+
+    res.send(engagement);
+});
+
+app.delete('/olive/engagement/deletebyId', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Engagement').deleteOne({
+        _id: ObjectId(req.query._id)
+    });
+
+    console.log(`${req.query._id}`);
+
+    res.send(result);
+});
 
 // Enrollment
 
@@ -856,6 +1020,17 @@ app.post('/olive/enroll', async (req, res) => {
     console.log(result.insertedIds);
 
     res.send(result);
+});
+
+// 
+app.get('/olive/enroll/getAll', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const results = await mongoClient.db('olive').collection('Enrollment').find({}).toArray();
+    console.log(results);
+
+    res.send(results);
 });
 
 app.get('/olive/enroll/getbyClassID', async (req, res) => {
@@ -902,6 +1077,16 @@ app.put('/olive/enroll/updateStudent', async (req, res) => {
     if (result.matchedCount > 0) {
         res.send(result);
     } else res.send(result);
+});
+
+app.delete('/olive/enroll/delete', async (req, res) => {
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Enrollment').deleteOne({
+        _id: ObjectId(req.query._id)
+    });
+
+    res.send(result);
 });
 
 // Score
@@ -1320,9 +1505,9 @@ app.put('/olive/emojis/clear', async (req, res) => {
     const result = await mongoClient.db('olive').collection('Emoji_Stack').updateOne({
         _id: ObjectId(req.query._id)
     },
-    {
-        $set: {"Clear_stack": true}
-    });
+        {
+            $set: { "Clear_stack": true }
+        });
     console.log(result);
 
     res.send(result);
