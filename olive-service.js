@@ -15,7 +15,7 @@ const port = process.env.PORT || 4000
 app.use(bodyParser.json(), cors())
 app.options('*', cors())
 
-app.post('/zoom', (req, res) => {
+app.post('/', (req, res) => {
 
     const iat = Math.round(new Date().getTime() / 1000) - 30;
     const exp = iat + 60 * 60 * 2
