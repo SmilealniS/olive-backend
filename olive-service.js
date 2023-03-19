@@ -295,7 +295,7 @@ app.delete('/olive/identity/deletebyId', async (req, res) => {
 
 // Login as
 
-app.post('/', async (req, res) => {
+app.post('/login', async (req, res) => {
     await mongoClient.connect();
 
     const user = await mongoClient.db('olive').collection('Identity').findOne({ Username: req.body.username });
