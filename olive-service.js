@@ -1588,17 +1588,41 @@ app.post('/olive/emoji', async (req, res) => {
     res.send(results);
 });
 
+app.get('/olive/emoji/getAll', async (req, res) => {
+    await mongoClient.connect();
+
+    const results = await mongoClient.db('olive').collection('Emoji').find({}).toArray();
+
+    res.send(results);
+});
+
 // Interaction_Log
 
 app.post('/olive/interact', async (req, res) => {
     await mongoClient.connect();
 
+    // let result = { message: `${req.body.Student} | ${req.body.Class} | ${req.body.Type} | ${req.body.Emoji} | ${req.body.Description} | ${req.body.Boolean}` };
+    // console.log(result);
+    // res.send(result);
+
+    let student = req.body.Student == undefined ? "" : req.body.Student;
+    let clas = req.body.Class == undefined ? "" : req.body.Class;
+    let type = req.body.Type == undefined ? "" : req.body.Type;
+    let emoji = req.body.Emoji == undefined ? "" : req.body.Emoji;
+    let desc = req.body.Description == undefined ? "" : req.body.Description;
+    let bools = req.body.Boolean == undefined ? "" : req.body.Boolean;
+
+    let today = new Date();
+    let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
+
     const interaction = {
-        Student: req.body.Student,
-        Class: req.body.Class,
-        Type: req.body.Type,
-        Emoji: req.body.Emoji,
-        Date: new Date().getDate(),
+        Student: student,
+        Class: clas,
+        Type: type,
+        Emoji: emoji,
+        Description: desc,
+        Boolean: bools,
+        Date: new Date(todaystring),
         Time: new Date().getTime()
     };
     console.log(interaction);
@@ -1606,6 +1630,63 @@ app.post('/olive/interact', async (req, res) => {
     const results = await mongoClient.db('olive').collection('Interaction_Log').insertOne(interaction);
 
     res.send(results);
+});
+
+app.get('/olive/interact/getAll', async (req, res) => {
+    await mongoClient.connect();
+
+    const results = await mongoClient.db('olive').collection('Interaction_Log').find({}).toArray();
+
+    res.send(results);
+});
+
+app.get('/olive/interact/getbyType', async (req, res) => {
+    await mongoClient.connect();
+
+    const results = await mongoClient.db('olive').collection('Interaction_Log').find({
+        Type: req.query.type,
+        Class: req.query.classid
+    }).sort({ Time: 1 }).toArray();
+
+    res.send(results);
+});
+
+app.get('/olive/interact/getChat', async (req, res) => {
+    await mongoClient.connect();
+
+    const results = await mongoClient.db('olive').collection('Interaction_Log').find({
+        Type: 'chat',
+        Student: req.query.student
+    }).toArray();
+
+    res.send(results);
+});
+
+app.delete('/olive/interact/deleteAll', async (req, res) => {
+    // Connect mongodb
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Interaction_Log')
+        .deleteMany({});
+
+    if (result.matchedCount > 0) {
+        res.send(result);
+    } else res.send(result);
+});
+
+// Delete list by id
+app.delete('/olive/interact/deletebyId', async (req, res) => {
+    // Connect mongodb
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Interaction_Log')
+        .deleteOne({
+            _id: ObjectId(req.query._id)
+        });
+
+    if (result.matchedCount > 0) {
+        res.send(result);
+    } else res.send(result);
 });
 
 // Emoji_Stack
@@ -1620,6 +1701,16 @@ app.post('/olive/emojis', async (req, res) => {
 
     res.send(results);
 });
+
+
+
+app.get('/olive/emojis/getAll', async (req, res) => {
+    await mongoClient.connect();
+
+    const results = await mongoClient.db('olive').collection('Emoji_Stack').find({}).toArray();
+
+    res.send(results);
+})
 
 // get stack with id
 app.get('/olive/emojis/getbyId', async (req, res) => {
