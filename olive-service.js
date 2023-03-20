@@ -1646,7 +1646,7 @@ app.get('/olive/interact/getbyType', async (req, res) => {
     const results = await mongoClient.db('olive').collection('Interaction_Log').find({
         Type: req.query.type,
         Class: req.query.classid
-    }).sort({ Time: 1 }).toArray();
+    }).sort({ Time: -1 }).toArray();
 
     res.send(results);
 });
@@ -1697,11 +1697,15 @@ app.post('/olive/emojis', async (req, res) => {
 
     const emojis = req.body;
 
+    let today = new Date();
+    let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
+
+    emojis['Date'] = new Date(todaystring);
+
     const results = await mongoClient.db('olive').collection('Emoji_Stack').insertOne(emojis);
 
     res.send(results);
 });
-
 
 
 app.get('/olive/emojis/getAll', async (req, res) => {
@@ -1720,6 +1724,22 @@ app.get('/olive/emojis/getbyId', async (req, res) => {
         _id: ObjectId(req.query._id)
     });
     console.log(stack);
+
+    res.send(stack);
+});
+
+app.get('/olive/emojis/getbyClass', async (req, res) => {
+    await mongoClient.connect();
+
+    let today = new Date();
+    let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
+
+    const stack = await mongoClient.db('olive').collection('Emoji_Stack').find({
+        Class: req.query.classid,
+        Clear_stack: false,
+        Date: new Date(todaystring)
+    }).toArray();
+    // console.log(stack);
 
     res.send(stack);
 });
