@@ -1029,7 +1029,8 @@ app.post('/olive/engagement', async (req, res) => {
             Date: new Date(todaystring),
             Engagement: 0
         },
-        Interaction_Log: req.body.Interaction_Log
+        Interaction_Log: req.body.Interaction_Log,
+        Clear: false
     };
 
     console.log(engagement);
@@ -1073,8 +1074,14 @@ app.get('/olive/engagement/getbyClassID', async (req, res) => {
 
     let classid = req.query.classid == undefined ? "none" : req.query.classid;
 
+    let today = new Date();
+    let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
+
+
     const results = await mongoClient.db('olive').collection('Engagement').find({
-        "Class.Id": classid
+        "Class.Id": classid,
+        "Class.Date": new Date(todaystring),
+        Clear: false
     }).toArray();
     console.log(results);
 
@@ -1122,6 +1129,27 @@ app.put('/olive/engagement/update', async (req, res) => {
         .updateOne({
             // Student_Id: req.query.student,
             // "Class.Id": req.query.class
+            _id: ObjectId(req.query._id)
+        }, {
+            $set: oldlog
+        });
+
+    res.send(results);
+});
+
+app.put('/olive/engagement/clear', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const oldlog = await mongoClient.db('olive').collection('Engagement')
+        .findOne({
+            _id: ObjectId(req.query._id)
+        });
+
+    oldlog.Clear = true;
+
+    const results = await mongoClient.db('olive').collection('Engagement')
+        .updateOne({
             _id: ObjectId(req.query._id)
         }, {
             $set: oldlog
