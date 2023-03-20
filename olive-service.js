@@ -737,12 +737,15 @@ app.post('/olive/attendance/create', async (req, res) => {
 
     const newList = req.body;
 
+    let today = new Date();
+    let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
+    // console.log(todaystring);
     for (let i = 0; i < newList.length; i++) {
         newList[i] = {
             "Student_Id": newList[i].Student_Id,
             "Class": {
                 "Id": newList[i].Class.Id,
-                "Date": "",
+                "Date": new Date(todaystring),
                 "Status": false,
                 "EnterTime": "",
                 "ExitTime": ""
@@ -758,6 +761,16 @@ app.post('/olive/attendance/create', async (req, res) => {
     console.log(result.insertedIds);
 
     res.send(result);
+});
+
+app.get('/olive/attendance/getAll', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const results = await mongoClient.db('olive').collection('Attendance').find({}).toArray();
+    console.log(results);
+
+    res.send(results);
 });
 
 // Find listing in collection 'Attendance' matched all params
@@ -784,14 +797,55 @@ app.get('/olive/attendance/getbyStudentId', async (req, res) => {
             Class End: ${result.Class.ExitTime}`);
         });
         res.send({
-            ...{result: results},
+            ...{ result: results },
             ...message
         });
     } else {
         let message = { 'message': `No listings found with Student_Profile(${req.query.student})` };
         console.log(message.message);
         res.send({
-            ...results,
+            ...{ result: results },
+            ...message
+        });
+    }
+});
+
+// 
+app.get('/olive/attendance/getbyparams', async (req, res) => {
+    // Connect mongodb
+    await mongoClient.connect();
+
+    let student = req.query.student == undefined ? "none" : req.query.student;
+    let classdate = req.query.classdate == undefined ? "" : req.query.classdate;
+    let classid = req.query.classid == undefined ? "" : req.query.classid;
+
+    const results = await mongoClient.db('olive').collection('Attendance').find({
+        Student_Id: student,
+        "Class.Id": classid,
+        "Class.Date": new Date(classdate)
+    }).toArray();
+
+    if (results.length > 0) {
+        let message = { 'message': `Found ${results.length} listing` };
+        console.log(message.message);
+        results.forEach((result, i) => {
+            console.log(`_id: ${result._id}
+            Student_Profile: ${result.Student_Id}
+            Class ID: ${result.Class.Id}
+            Class Date: ${result.Class.Date}
+            Class status: ${result.Class.Status}
+            Class Start: ${result.Class.EnterTime}
+            Class End: ${result.Class.ExitTime}`);
+        });
+        res.send({
+            ...{ result: results },
+            ...message
+        });
+    } else {
+        let message = { 'message': `No listings found with Student_Profile(${req.query.student})` };
+        console.log(message.message);
+        res.send({
+            ...{ result: results },
             ...message
         });
     }
@@ -820,14 +874,14 @@ app.get('/olive/attendance/getbyClassId', async (req, res) => {
             Class End: ${result.Class.ExitTime}`);
         });
         res.send({
-            ...results,
+            ...{ result: results },
             ...message
         });
     } else {
         let message = { 'message': `No listings found with Class ID(${req.query.classid})` };
         console.log(message.message);
         res.send({
-            ...results,
+            ...{ result: results },
             ...message
         });
     }
@@ -869,12 +923,15 @@ app.get('/olive/attendance/getbyClassDate', async (req, res) => {
     }
 });
 
-// Update status of attendance list by id
+// Update EnterTime and status of attendance list by id
 app.put('/olive/attendance/updatebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
-    const updatedList = { "Class.Status": true };
+    const updatedList = {
+        "Class.Status": true,
+        "Class.EnterTime": new Date().getTime()
+    };
 
     const result = await mongoClient.db('olive').collection('Attendance')
         .updateOne({
@@ -889,13 +946,12 @@ app.put('/olive/attendance/updatebyId', async (req, res) => {
     } else res.send(result);
 });
 
-// Update EnterTime and date of attendance list by id
+// Update EnterTime of attendance list by id
 app.put('/olive/attendance/updateEnter', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
     const updatedList = {
-        "Class.Date": new Date().getDate(),
         "Class.EnterTime": new Date().getTime()
     };
 
@@ -930,6 +986,18 @@ app.put('/olive/attendance/updateLeave', async (req, res) => {
     } else res.send(result);
 });
 
+app.delete('/olive/attendance/deleteAll', async (req, res) => {
+    // Connect mongodb
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Attendance')
+        .deleteMany({});
+
+    if (result.matchedCount > 0) {
+        res.send(result);
+    } else res.send(result);
+});
+
 // Delete list by id
 app.delete('/olive/attendance/deletebyId', async (req, res) => {
     // Connect mongodb
@@ -951,11 +1019,14 @@ app.post('/olive/engagement', async (req, res) => {
     // 
     await mongoClient.connect();
 
+    let today = new Date();
+    let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
+
     const engagement = {
         Student_Id: req.body.Student_Id,
         Class: {
             Id: req.body.Class.Id,
-            Date: new Date(req.body.Class.Date),
+            Date: new Date(todaystring),
             Engagement: 0
         },
         Interaction_Log: req.body.Interaction_Log
@@ -979,6 +1050,37 @@ app.get('/olive/engagement/getAll', async (req, res) => {
     res.send(results);
 });
 
+// 
+app.get('/olive/engagement/getbyStudentID', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    let student = req.query.student == undefined ? "none" : req.query.student;
+    let classid = req.query.classid == undefined ? "none" : req.query.classid;
+
+    const results = await mongoClient.db('olive').collection('Engagement').find({
+        Student_Id: student,
+        "Class.Id": classid
+    }).toArray();
+    console.log(results);
+
+    res.send(results);
+});
+
+app.get('/olive/engagement/getbyClassID', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    let classid = req.query.classid == undefined ? "none" : req.query.classid;
+
+    const results = await mongoClient.db('olive').collection('Engagement').find({
+        "Class.Id": classid
+    }).toArray();
+    console.log(results);
+
+    res.send(results);
+});
+
 app.put('/olive/engagement/addLog', async (req, res) => {
     // 
     await mongoClient.connect();
@@ -989,9 +1091,43 @@ app.put('/olive/engagement/addLog', async (req, res) => {
         Student_Id: req.query.student,
         "Class.Id": req.query.class
     });
-    console.log(engagement.Interaction_Log.push(log.Interaction_Log));
 
-    res.send(engagement);
+    engagement.Interaction_Log.push(log.Interaction_Log);
+
+    const results = await mongoClient.db('olive').collection('Engagement')
+        .updateOne({
+            Student_Id: req.query.student,
+            "Class.Id": req.query.class
+        }, {
+            $set: engagement
+        });
+
+    res.send(results);
+});
+
+app.put('/olive/engagement/update', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const log = req.body;
+
+    const oldlog = await mongoClient.db('olive').collection('Engagement')
+        .findOne({
+            _id: ObjectId(req.query._id)
+        });
+
+    oldlog.Class.Engagement = log.Class.Engagement;
+
+    const results = await mongoClient.db('olive').collection('Engagement')
+        .updateOne({
+            // Student_Id: req.query.student,
+            // "Class.Id": req.query.class
+            _id: ObjectId(req.query._id)
+        }, {
+            $set: oldlog
+        });
+
+    res.send(results);
 });
 
 app.delete('/olive/engagement/deletebyId', async (req, res) => {
@@ -1064,6 +1200,20 @@ app.put('/olive/enroll/updateStudent', async (req, res) => {
     await mongoClient.connect();
 
     const updatedList = req.body;
+
+    const oldstudent = await mongoClient.db('olive').collection('Enrollment').findOne({
+        Class: req.query.classid
+    });
+
+    // console.log(oldstudent.Student);
+
+    oldstudent.Student.forEach(stu => {
+        if (!updatedList.Student.includes(stu)) {
+            updatedList.Student.push(stu)
+        } else console.log(stu, 'already enrolled')
+    })
+
+    // console.log(updatedList);
 
     const result = await mongoClient.db('olive').collection('Enrollment')
         .updateOne({
