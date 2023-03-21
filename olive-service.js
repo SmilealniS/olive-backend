@@ -15,34 +15,6 @@ const port = process.env.PORT || 4000
 app.use(bodyParser.json(), cors())
 app.options('*', cors())
 
-app.post('/', (req, res) => {
-
-    const iat = Math.round(new Date().getTime() / 1000) - 30;
-    const exp = iat + 60 * 60 * 2
-
-    const oHeader = { alg: 'HS256', typ: 'JWT' }
-
-    const oPayload = {
-        sdkKey: process.env.ZOOM_SDK_KEY,
-        mn: req.body.meetingNumber,
-        role: req.body.role,
-        iat: iat,
-        exp: exp,
-        appKey: process.env.ZOOM_SDK_KEY,
-        tokenExp: iat + 60 * 60 * 2
-    }
-
-    const sHeader = JSON.stringify(oHeader)
-    const sPayload = JSON.stringify(oPayload)
-    const signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, process.env.ZOOM_SDK_SECRET)
-
-    res.json({
-        signature: signature
-    })
-
-    console.log(res);
-})
-
 // ---------- mongo ----------
 
 // const url = "mongodb+srv://SmilealniS:sutorimu13@npm-olive.4z8itim.mongodb.net/?retryWrites=true&w=majority";
@@ -295,8 +267,9 @@ app.delete('/olive/identity/deletebyId', async (req, res) => {
 
 // Login as
 
-app.post('/login', async (req, res) => {
+app.post('/', async (req, res) => {
     await mongoClient.connect();
+    // console.log(req.body)
 
     const user = await mongoClient.db('olive').collection('Identity').findOne({ Username: req.body.username });
 
