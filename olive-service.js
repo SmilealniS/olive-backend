@@ -293,6 +293,7 @@ app.post('/', async (req, res) => {
 
         } else res.status(400).json({ error: "Password doesn't match" });
     } else res.status(400).json({ error: "User doesn't match" });
+
 });
 
 // Student_Profile
@@ -865,8 +866,10 @@ app.get('/olive/attendance/getbyClassDate', async (req, res) => {
     await mongoClient.connect();
 
     let classdate = req.query.classdate == undefined ? "" : req.query.classdate;
+    let classid = req.query.classid == undefined ? "" : req.query.classid;
 
     const results = await mongoClient.db('olive').collection('Attendance').find({
+        "Class._id": classid,
         "Class.Date": new Date(classdate)
     }).toArray();
 
