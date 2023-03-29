@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const crypto = require('crypto')
 const cors = require('cors')
 const KJUR = require('jsrsasign');
+const router = express.Router();
 
 const app = express()
 const port = process.env.PORT || 4000
@@ -14,6 +15,7 @@ const port = process.env.PORT || 4000
 
 app.use(bodyParser.json(), cors())
 app.options('*', cors())
+app.use(router)
 
 // ---------- mongo ----------
 
@@ -24,7 +26,7 @@ const url = "mongodb://root:ictoliveict@mongo:27017";
 const mongoClient = new MongoClient(url);
 
 // Get all databases
-app.get('/olive/listDatabases', async (req, res) => {
+router.get('/olive/listDatabases', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -41,7 +43,7 @@ app.get('/olive/listDatabases', async (req, res) => {
 });
 
 // Create new collection in 'olive' database
-app.post('/olive/createCollections', async (req, res) => {
+router.post('/olive/createCollections', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -65,7 +67,7 @@ app.post('/olive/createCollections', async (req, res) => {
 });
 
 // Get all collections in database 'olive'
-app.get('/olive/getCollections', async (req, res) => {
+router.get('/olive/getCollections', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -82,7 +84,7 @@ app.get('/olive/getCollections', async (req, res) => {
 // Identity collection function
 
 // Create lists in collection 'Identity' in database 'olive'
-app.post('/olive/identity/create', async (req, res) => {
+router.post('/olive/identity/create', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -101,7 +103,7 @@ app.post('/olive/identity/create', async (req, res) => {
 });
 
 // Find all listing in collection 'Identity'
-app.get('/olive/identity/getAll', async (req, res) => {
+router.get('/olive/identity/getAll', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -130,7 +132,7 @@ app.get('/olive/identity/getAll', async (req, res) => {
 });
 
 // Find listing in collection 'Identity' matched 'ObjectId'
-app.get('/olive/identity/getbyId', async (req, res) => {
+router.get('/olive/identity/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -163,7 +165,7 @@ app.get('/olive/identity/getbyId', async (req, res) => {
 });
 
 // Find listing in collection 'Identity' matched all params
-app.get('/olive/identity/getbyParams', async (req, res) => {
+router.get('/olive/identity/getbyParams', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -232,7 +234,7 @@ app.get('/olive/identity/getbyParams', async (req, res) => {
 });
 
 // Update list by id
-app.put('/olive/identity/updatebyId', async (req, res) => {
+router.put('/olive/identity/updatebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -251,7 +253,7 @@ app.put('/olive/identity/updatebyId', async (req, res) => {
 });
 
 // Delete list by id
-app.delete('/olive/identity/deletebyId', async (req, res) => {
+router.delete('/olive/identity/deletebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -267,7 +269,7 @@ app.delete('/olive/identity/deletebyId', async (req, res) => {
 
 // Login as
 
-app.post('/', async (req, res) => {
+router.post('/', async (req, res) => {
     await mongoClient.connect();
     // console.log(req.body)
 
@@ -299,7 +301,7 @@ app.post('/', async (req, res) => {
 // Student_Profile
 
 // Create lists in collection 'Student_Profile' in database 'olive'
-app.post('/olive/student-profile/create', async (req, res) => {
+router.post('/olive/student-profile/create', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -318,7 +320,7 @@ app.post('/olive/student-profile/create', async (req, res) => {
 });
 
 // Find all listing in collection 'Student_Profile'
-app.get('/olive/student-profile/getAll', async (req, res) => {
+router.get('/olive/student-profile/getAll', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -341,7 +343,7 @@ app.get('/olive/student-profile/getAll', async (req, res) => {
 });
 
 // Find listing in collection 'Student_Profile' matched 'ObjectId'
-app.get('/olive/student-profile/getbyId', async (req, res) => {
+router.get('/olive/student-profile/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
     console.log(req)
@@ -369,7 +371,7 @@ app.get('/olive/student-profile/getbyId', async (req, res) => {
 });
 
 // Find listing in collection 'Student_Profile' matched all params
-app.get('/olive/student-profile/getbyParams', async (req, res) => {
+router.get('/olive/student-profile/getbyParams', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -399,7 +401,7 @@ app.get('/olive/student-profile/getbyParams', async (req, res) => {
 });
 
 // Update list in "Student_Profile" by id
-app.put('/olive/student-profile/updatebyId', async (req, res) => {
+router.put('/olive/student-profile/updatebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -418,7 +420,7 @@ app.put('/olive/student-profile/updatebyId', async (req, res) => {
 });
 
 // Delete list in "Student_Profile" by id
-app.delete('/olive/student-profile/deletebyId', async (req, res) => {
+router.delete('/olive/student-profile/deletebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -435,7 +437,7 @@ app.delete('/olive/student-profile/deletebyId', async (req, res) => {
 // Teacher_Profile
 
 // Create lists in collection 'Teacher_Profile' in database 'olive'
-app.post('/olive/teacher-profile/create', async (req, res) => {
+router.post('/olive/teacher-profile/create', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -454,7 +456,7 @@ app.post('/olive/teacher-profile/create', async (req, res) => {
 });
 
 // Find all listing in collection 'Teacher_Profile'
-app.get('/olive/teacher-profile/getAll', async (req, res) => {
+router.get('/olive/teacher-profile/getAll', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -477,7 +479,7 @@ app.get('/olive/teacher-profile/getAll', async (req, res) => {
 });
 
 // Find listing in collection 'Teacher_Profile' matched 'ObjectId'
-app.get('/olive/teacher-profile/getbyId', async (req, res) => {
+router.get('/olive/teacher-profile/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -504,7 +506,7 @@ app.get('/olive/teacher-profile/getbyId', async (req, res) => {
 });
 
 // Find listing in collection 'Teacher_Profile' matched all params
-app.get('/olive/teacher-profile/getbyParams', async (req, res) => {
+router.get('/olive/teacher-profile/getbyParams', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -534,7 +536,7 @@ app.get('/olive/teacher-profile/getbyParams', async (req, res) => {
 });
 
 // Update list in "Teacher_Profile" by id
-app.put('/olive/teacher-profile/updatebyId', async (req, res) => {
+router.put('/olive/teacher-profile/updatebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -553,7 +555,7 @@ app.put('/olive/teacher-profile/updatebyId', async (req, res) => {
 });
 
 // Delete list in "Teacher_Profile" by id
-app.delete('/olive/teacher-profile/deletebyId', async (req, res) => {
+router.delete('/olive/teacher-profile/deletebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -570,7 +572,7 @@ app.delete('/olive/teacher-profile/deletebyId', async (req, res) => {
 // Admin_Profile
 
 // Create lists in collection 'Admin_Profile' in database 'olive'
-app.post('/olive/admin-profile/create', async (req, res) => {
+router.post('/olive/admin-profile/create', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -589,7 +591,7 @@ app.post('/olive/admin-profile/create', async (req, res) => {
 });
 
 // Find all listing in collection 'Admin_Profile'
-app.get('/olive/admin-profile/getAll', async (req, res) => {
+router.get('/olive/admin-profile/getAll', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -612,7 +614,7 @@ app.get('/olive/admin-profile/getAll', async (req, res) => {
 });
 
 // Find listing in collection 'Admin_Profile' matched 'ObjectId'
-app.get('/olive/admin-profile/getbyId', async (req, res) => {
+router.get('/olive/admin-profile/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -639,7 +641,7 @@ app.get('/olive/admin-profile/getbyId', async (req, res) => {
 });
 
 // Find listing in collection 'Admin_Profile' matched all params
-app.get('/olive/admin-profile/getbyParams', async (req, res) => {
+router.get('/olive/admin-profile/getbyParams', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -669,7 +671,7 @@ app.get('/olive/admin-profile/getbyParams', async (req, res) => {
 });
 
 // Update list in "Admin_Profile" by id
-app.put('/olive/admin-profile/updatebyId', async (req, res) => {
+router.put('/olive/admin-profile/updatebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -688,7 +690,7 @@ app.put('/olive/admin-profile/updatebyId', async (req, res) => {
 });
 
 // Delete list in "Admin_Profile" by id
-app.delete('/olive/admin-profile/deletebyId', async (req, res) => {
+router.delete('/olive/admin-profile/deletebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -705,7 +707,7 @@ app.delete('/olive/admin-profile/deletebyId', async (req, res) => {
 // Attendance
 
 // Create lists in collection 'Identity' in database 'olive'
-app.post('/olive/attendance/create', async (req, res) => {
+router.post('/olive/attendance/create', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -713,7 +715,7 @@ app.post('/olive/attendance/create', async (req, res) => {
 
     let today = new Date();
     let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
-    // console.log(todaystring);
+    console.log(todaystring);
     for (let i = 0; i < newList.length; i++) {
         newList[i] = {
             "Student_Id": newList[i].Student_Id,
@@ -737,7 +739,7 @@ app.post('/olive/attendance/create', async (req, res) => {
     res.send(result);
 });
 
-app.get('/olive/attendance/getAll', async (req, res) => {
+router.get('/olive/attendance/getAll', async (req, res) => {
     // 
     await mongoClient.connect();
 
@@ -748,7 +750,7 @@ app.get('/olive/attendance/getAll', async (req, res) => {
 });
 
 // Find listing in collection 'Attendance' matched all params
-app.get('/olive/attendance/getbyStudentId', async (req, res) => {
+router.get('/olive/attendance/getbyStudentId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -785,7 +787,7 @@ app.get('/olive/attendance/getbyStudentId', async (req, res) => {
 });
 
 // 
-app.get('/olive/attendance/getbyparams', async (req, res) => {
+router.get('/olive/attendance/getbyparams', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -825,7 +827,7 @@ app.get('/olive/attendance/getbyparams', async (req, res) => {
     }
 });
 
-app.get('/olive/attendance/getbyClassId', async (req, res) => {
+router.get('/olive/attendance/getbyClassId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -861,7 +863,7 @@ app.get('/olive/attendance/getbyClassId', async (req, res) => {
     }
 });
 
-app.get('/olive/attendance/getbyClassDate', async (req, res) => {
+router.get('/olive/attendance/getbyClassDate', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -900,7 +902,7 @@ app.get('/olive/attendance/getbyClassDate', async (req, res) => {
 });
 
 // Update EnterTime and status of attendance list by id
-app.put('/olive/attendance/updatebyId', async (req, res) => {
+router.put('/olive/attendance/updatebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -923,7 +925,7 @@ app.put('/olive/attendance/updatebyId', async (req, res) => {
 });
 
 // Update EnterTime of attendance list by id
-app.put('/olive/attendance/updateEnter', async (req, res) => {
+router.put('/olive/attendance/updateEnter', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -944,7 +946,7 @@ app.put('/olive/attendance/updateEnter', async (req, res) => {
 });
 
 // Update ExitTime of attendance list by id
-app.put('/olive/attendance/updateLeave', async (req, res) => {
+router.put('/olive/attendance/updateLeave', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -962,7 +964,7 @@ app.put('/olive/attendance/updateLeave', async (req, res) => {
     } else res.send(result);
 });
 
-app.delete('/olive/attendance/deleteAll', async (req, res) => {
+router.delete('/olive/attendance/deleteAll', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -975,7 +977,7 @@ app.delete('/olive/attendance/deleteAll', async (req, res) => {
 });
 
 // Delete list by id
-app.delete('/olive/attendance/deletebyId', async (req, res) => {
+router.delete('/olive/attendance/deletebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -991,9 +993,11 @@ app.delete('/olive/attendance/deletebyId', async (req, res) => {
 
 // Engagement <NOT YET>
 
-app.post('/olive/engagement', async (req, res) => {
+router.post('/olive/engagement', async (req, res) => {
     // 
     await mongoClient.connect();
+
+    console.log('-------------------- Create engagement --------------------')
 
     let today = new Date();
     let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
@@ -1017,7 +1021,7 @@ app.post('/olive/engagement', async (req, res) => {
     res.send(result);
 });
 
-app.get('/olive/engagement/getAll', async (req, res) => {
+router.get('/olive/engagement/getAll', async (req, res) => {
     // 
     await mongoClient.connect();
 
@@ -1028,7 +1032,7 @@ app.get('/olive/engagement/getAll', async (req, res) => {
 });
 
 // 
-app.get('/olive/engagement/getbyStudentID', async (req, res) => {
+router.get('/olive/engagement/getbyStudentID', async (req, res) => {
     // 
     await mongoClient.connect();
 
@@ -1037,14 +1041,15 @@ app.get('/olive/engagement/getbyStudentID', async (req, res) => {
 
     const results = await mongoClient.db('olive').collection('Engagement').find({
         Student_Id: student,
-        "Class.Id": classid
+        "Class.Id": classid,
+        Clear: false
     }).toArray();
     console.log(results);
 
     res.send(results);
 });
 
-app.get('/olive/engagement/getbyClassID', async (req, res) => {
+router.get('/olive/engagement/getbyClassID', async (req, res) => {
     // 
     await mongoClient.connect();
 
@@ -1054,41 +1059,42 @@ app.get('/olive/engagement/getbyClassID', async (req, res) => {
     let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
 
 
-    const results = await mongoClient.db('olive').collection('Engagement').find({
+    const results = await mongoClient.db('olive').collection('Engagement').findOne({
         "Class.Id": classid,
         "Class.Date": new Date(todaystring),
         Clear: false
-    }).toArray();
+    });
     console.log(results);
 
     res.send(results);
 });
 
-app.put('/olive/engagement/addLog', async (req, res) => {
+router.put('/olive/engagement/addLog', async (req, res) => {
     // 
     await mongoClient.connect();
 
+    console.log('------------------- Add log ------------------')
     const log = req.body;
 
     const engagement = await mongoClient.db('olive').collection('Engagement').findOne({
         Student_Id: req.query.student,
-        "Class.Id": req.query.class
+        "Class.Id": req.query.class,
+        Clear: false
     });
+    console.log(engagement)
 
     engagement.Interaction_Log.push(log.Interaction_Log);
 
-    const results = await mongoClient.db('olive').collection('Engagement')
-        .updateOne({
-            Student_Id: req.query.student,
-            "Class.Id": req.query.class
-        }, {
-            $set: engagement
-        });
+    const results = await mongoClient.db('olive').collection('Engagement').findOneAndUpdate({
+        _id: engagement._id
+    }, {
+        $set: engagement
+    });
 
     res.send(results);
 });
 
-app.put('/olive/engagement/update', async (req, res) => {
+router.put('/olive/engagement/update', async (req, res) => {
     // 
     await mongoClient.connect();
 
@@ -1113,7 +1119,7 @@ app.put('/olive/engagement/update', async (req, res) => {
     res.send(results);
 });
 
-app.put('/olive/engagement/clear', async (req, res) => {
+router.put('/olive/engagement/clear', async (req, res) => {
     // 
     await mongoClient.connect();
 
@@ -1134,7 +1140,7 @@ app.put('/olive/engagement/clear', async (req, res) => {
     res.send(results);
 });
 
-app.delete('/olive/engagement/deletebyId', async (req, res) => {
+router.delete('/olive/engagement/deletebyId', async (req, res) => {
     // 
     await mongoClient.connect();
 
@@ -1147,9 +1153,18 @@ app.delete('/olive/engagement/deletebyId', async (req, res) => {
     res.send(result);
 });
 
+router.delete('/olive/engagement/deleteAll', async (req, res) => {
+    // 
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Engagement').deleteMany({});
+
+    res.send(result);
+});
+
 // Enrollment
 
-app.post('/olive/enroll', async (req, res) => {
+router.post('/olive/enroll', async (req, res) => {
     let newList = req.body;
 
     console.log(newList);
@@ -1163,7 +1178,7 @@ app.post('/olive/enroll', async (req, res) => {
 });
 
 // 
-app.get('/olive/enroll/getAll', async (req, res) => {
+router.get('/olive/enroll/getAll', async (req, res) => {
     // 
     await mongoClient.connect();
 
@@ -1173,7 +1188,7 @@ app.get('/olive/enroll/getAll', async (req, res) => {
     res.send(results);
 });
 
-app.get('/olive/enroll/getbyClassID', async (req, res) => {
+router.get('/olive/enroll/getbyClassID', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1186,7 +1201,7 @@ app.get('/olive/enroll/getbyClassID', async (req, res) => {
     res.send(result);
 });
 
-app.get('/olive/enroll/getbyStudentID', async (req, res) => {
+router.get('/olive/enroll/getbyStudentID', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1199,7 +1214,7 @@ app.get('/olive/enroll/getbyStudentID', async (req, res) => {
     res.send(result);
 });
 
-app.put('/olive/enroll/updateStudent', async (req, res) => {
+router.put('/olive/enroll/updateStudent', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1233,7 +1248,7 @@ app.put('/olive/enroll/updateStudent', async (req, res) => {
     } else res.send(result);
 });
 
-app.delete('/olive/enroll/delete', async (req, res) => {
+router.delete('/olive/enroll/delete', async (req, res) => {
     await mongoClient.connect();
 
     const result = await mongoClient.db('olive').collection('Enrollment').deleteOne({
@@ -1245,7 +1260,7 @@ app.delete('/olive/enroll/delete', async (req, res) => {
 
 // Score
 
-app.post('/olive/score/create', async (req, res) => {
+router.post('/olive/score/create', async (req, res) => {
     await mongoClient.connect();
 
     const newList = req.body;
@@ -1258,7 +1273,7 @@ app.post('/olive/score/create', async (req, res) => {
 });
 
 // get all score
-app.get('/olive/score/getAll', async (req, res) => {
+router.get('/olive/score/getAll', async (req, res) => {
     await mongoClient.connect();
 
     const result = await mongoClient.db('olive').collection('Score').find({}).toArray();
@@ -1268,7 +1283,7 @@ app.get('/olive/score/getAll', async (req, res) => {
 })
 
 // get score by student _id
-app.get('/olive/score/getbyStudentId', async (req, res) => {
+router.get('/olive/score/getbyStudentId', async (req, res) => {
     await mongoClient.connect();
 
     const result = await mongoClient.db('olive').collection('Score').find({
@@ -1280,7 +1295,7 @@ app.get('/olive/score/getbyStudentId', async (req, res) => {
 })
 
 // get score by class id
-app.get('/olive/score/getbyClassId', async (req, res) => {
+router.get('/olive/score/getbyClassId', async (req, res) => {
     await mongoClient.connect();
 
     const result = await mongoClient.db('olive').collection('Score').find({
@@ -1292,7 +1307,7 @@ app.get('/olive/score/getbyClassId', async (req, res) => {
 })
 
 // update score by student and class id
-app.put('/olive/score/update', async (req, res) => {
+router.put('/olive/score/update', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1311,7 +1326,7 @@ app.put('/olive/score/update', async (req, res) => {
     } else res.send(result);
 });
 
-app.delete('/olive/score/delete', async (req, res) => {
+router.delete('/olive/score/delete', async (req, res) => {
     await mongoClient.connect();
 
     const result = await mongoClient.db('olive').collection('Score').deleteOne({
@@ -1325,7 +1340,7 @@ app.delete('/olive/score/delete', async (req, res) => {
 
 // Class
 
-app.post('/olive/class/create', async (req, res) => {
+router.post('/olive/class/create', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1338,9 +1353,7 @@ app.post('/olive/class/create', async (req, res) => {
             "Password": newList[i].Password,
             "Teacher": newList[i].Teacher,
             "Admin": newList[i].Admin,
-            "Date": "",
-            "Start_time": "",
-            "End_time": ""
+            "Class": []
         }
 
         console.log(newList[i]);
@@ -1355,7 +1368,7 @@ app.post('/olive/class/create', async (req, res) => {
 });
 
 // get all class in database
-app.get('/olive/class/getAll', async (req, res) => {
+router.get('/olive/class/getAll', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1391,19 +1404,19 @@ app.get('/olive/class/getAll', async (req, res) => {
 });
 
 // Find listing in collection 'Class' by _id
-app.get('/olive/class/getbyId', async (req, res) => {
+router.get('/olive/class/getbyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
-    const results = await mongoClient.db('olive').collection('Class').find({
+    const result = await mongoClient.db('olive').collection('Class').findOne({
         _id: ObjectId(req.query._id)
-    }).toArray();
+    });
 
-    if (results.length > 0) {
-        let message = { 'message': `Found ${results.length} listing` };
+    if (result) {
+        let message = { 'message': `Found listing with id ${req.query._id}` };
         console.log(message.message);
-        results.forEach((result, i) => {
-            console.log(`_id: ${result._id}
+
+        console.log(`_id: ${result._id}
                     "Name": ${result.Name},
                     "Meeting_number": ${result.Meeting_number},
                     "Password": ${result.Password},
@@ -1412,23 +1425,23 @@ app.get('/olive/class/getbyId', async (req, res) => {
                     "Date": ${result.Date},
                     "Start_time": ${result.Start_time},
                     "End_time": ${result.End_time}
-            `);
-        });
+                    `);
+
         res.send({
-            ...results,
+            ...result,
             ...message
         });
     } else {
         let message = { 'message': `No listings found with Class ID(${req.query._id})` };
         console.log(message.message);
         res.send({
-            ...results,
+            ...result,
             ...message
         });
     }
 });
 
-app.get('/olive/class/getbyTeacher', async (req, res) => {
+router.get('/olive/class/getbyTeacher', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1465,7 +1478,7 @@ app.get('/olive/class/getbyTeacher', async (req, res) => {
     }
 });
 
-app.get('/olive/class/getbyClassDate', async (req, res) => {
+router.get('/olive/class/getbyClassDate', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1502,17 +1515,28 @@ app.get('/olive/class/getbyClassDate', async (req, res) => {
 });
 
 // Update status of class list by id
-app.put('/olive/class/updatebyId', async (req, res) => {
+router.put('/olive/class/updatebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
+    console.log('-------------------- Update class by Id --------------------')
+
+    const old = await mongoClient.db('olive').collection('Class').findOne({
+        _id: ObjectId(req.query._id)
+    });
+    // console.log(old);
 
     const updatedList = req.body;
+    old.Class.push(updatedList.Class)
+
+    // console.log(updatedList.Class, old.Class)
+    // console.log(old.Class.push(updatedList.Class))
+    // console.log(old)
 
     const result = await mongoClient.db('olive').collection('Class')
         .updateOne({
             _id: ObjectId(req.query._id)
         }, {
-            $set: updatedList
+            $set: old
         });
 
     if (result.matchedCount > 0) {
@@ -1521,7 +1545,7 @@ app.put('/olive/class/updatebyId', async (req, res) => {
 });
 
 // Update EnterTime and date of class list by id
-app.put('/olive/class/updateEnter', async (req, res) => {
+router.put('/olive/class/updateEnter', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1543,7 +1567,7 @@ app.put('/olive/class/updateEnter', async (req, res) => {
 });
 
 // Update ExitTime of class list by id
-app.put('/olive/class/updateLeave', async (req, res) => {
+router.put('/olive/class/updateLeave', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1562,7 +1586,7 @@ app.put('/olive/class/updateLeave', async (req, res) => {
 });
 
 // Delete list by id
-app.delete('/olive/class/deletebyId', async (req, res) => {
+router.delete('/olive/class/deletebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1582,7 +1606,7 @@ app.delete('/olive/class/deletebyId', async (req, res) => {
 
 // Emoji
 
-app.post('/olive/emoji', async (req, res) => {
+router.post('/olive/emoji', async (req, res) => {
     await mongoClient.connect();
 
     const emojis = req.body;
@@ -1592,7 +1616,7 @@ app.post('/olive/emoji', async (req, res) => {
     res.send(results);
 });
 
-app.get('/olive/emoji/getAll', async (req, res) => {
+router.get('/olive/emoji/getAll', async (req, res) => {
     await mongoClient.connect();
 
     const results = await mongoClient.db('olive').collection('Emoji').find({}).toArray();
@@ -1602,7 +1626,7 @@ app.get('/olive/emoji/getAll', async (req, res) => {
 
 // Interaction_Log
 
-app.post('/olive/interact', async (req, res) => {
+router.post('/olive/interact', async (req, res) => {
     await mongoClient.connect();
 
     // let result = { message: `${req.body.Student} | ${req.body.Class} | ${req.body.Type} | ${req.body.Emoji} | ${req.body.Description} | ${req.body.Boolean}` };
@@ -1636,7 +1660,7 @@ app.post('/olive/interact', async (req, res) => {
     res.send(results);
 });
 
-app.get('/olive/interact/getAll', async (req, res) => {
+router.get('/olive/interact/getAll', async (req, res) => {
     await mongoClient.connect();
 
     const results = await mongoClient.db('olive').collection('Interaction_Log').find({}).toArray();
@@ -1644,18 +1668,22 @@ app.get('/olive/interact/getAll', async (req, res) => {
     res.send(results);
 });
 
-app.get('/olive/interact/getbyType', async (req, res) => {
+router.get('/olive/interact/getbyType', async (req, res) => {
     await mongoClient.connect();
+
+    let today = new Date();
+    let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
 
     const results = await mongoClient.db('olive').collection('Interaction_Log').find({
         Type: req.query.type,
-        Class: req.query.classid
-    }).sort({ Time: -1 }).toArray();
+        Class: req.query.classid,
+        Date: new Date(todaystring)
+    }).sort({ Time: 1 }).toArray();
 
     res.send(results);
 });
 
-app.get('/olive/interact/getChat', async (req, res) => {
+router.get('/olive/interact/getChat', async (req, res) => {
     await mongoClient.connect();
 
     const results = await mongoClient.db('olive').collection('Interaction_Log').find({
@@ -1666,7 +1694,7 @@ app.get('/olive/interact/getChat', async (req, res) => {
     res.send(results);
 });
 
-app.delete('/olive/interact/deleteAll', async (req, res) => {
+router.delete('/olive/interact/deleteAll', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1679,7 +1707,7 @@ app.delete('/olive/interact/deleteAll', async (req, res) => {
 });
 
 // Delete list by id
-app.delete('/olive/interact/deletebyId', async (req, res) => {
+router.delete('/olive/interact/deletebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
@@ -1696,7 +1724,7 @@ app.delete('/olive/interact/deletebyId', async (req, res) => {
 // Emoji_Stack
 
 // Stacking
-app.post('/olive/emojis', async (req, res) => {
+router.post('/olive/emojis', async (req, res) => {
     await mongoClient.connect();
 
     const emojis = req.body;
@@ -1712,7 +1740,7 @@ app.post('/olive/emojis', async (req, res) => {
 });
 
 
-app.get('/olive/emojis/getAll', async (req, res) => {
+router.get('/olive/emojis/getAll', async (req, res) => {
     await mongoClient.connect();
 
     const results = await mongoClient.db('olive').collection('Emoji_Stack').find({}).toArray();
@@ -1721,7 +1749,7 @@ app.get('/olive/emojis/getAll', async (req, res) => {
 })
 
 // get stack with id
-app.get('/olive/emojis/getbyId', async (req, res) => {
+router.get('/olive/emojis/getbyId', async (req, res) => {
     await mongoClient.connect();
 
     const stack = await mongoClient.db('olive').collection('Emoji_Stack').findOne({
@@ -1732,7 +1760,7 @@ app.get('/olive/emojis/getbyId', async (req, res) => {
     res.send(stack);
 });
 
-app.get('/olive/emojis/getbyClass', async (req, res) => {
+router.get('/olive/emojis/getbyClass', async (req, res) => {
     await mongoClient.connect();
 
     let today = new Date();
@@ -1749,7 +1777,7 @@ app.get('/olive/emojis/getbyClass', async (req, res) => {
 });
 
 // append emoji
-app.put('/olive/emojis/add', async (req, res) => {
+router.put('/olive/emojis/add', async (req, res) => {
     await mongoClient.connect();
 
     const emojis = req.body;
@@ -1764,7 +1792,7 @@ app.put('/olive/emojis/add', async (req, res) => {
 });
 
 // clear stack
-app.put('/olive/emojis/clear', async (req, res) => {
+router.put('/olive/emojis/clear', async (req, res) => {
     await mongoClient.connect();
 
     const result = await mongoClient.db('olive').collection('Emoji_Stack').updateOne({
@@ -1778,7 +1806,7 @@ app.put('/olive/emojis/clear', async (req, res) => {
     res.send(result);
 });
 
-app.delete('/olive/emojis/delete', async (req, res) => {
+router.delete('/olive/emojis/delete', async (req, res) => {
     const result = await mongoClient.db('olive').collection('Emoji_Stack').deleteOne({
         _id: ObjectId(req.query._id)
     });
