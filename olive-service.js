@@ -3,13 +3,14 @@ const { mongo, MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
-const crypto = require('crypto')
 const cors = require('cors')
-const KJUR = require('jsrsasign');
+
+const port = process.env.PORT || 4000
+const app = express()
 const router = express.Router();
 
-const app = express()
-const port = process.env.PORT || 4000
+const options = { /* ... */ };
+const socket = require("socket.io");
 
 // ---------- zoom signature ----------
 
@@ -348,25 +349,24 @@ router.get('/olive/student-profile/getbyId', async (req, res) => {
     await mongoClient.connect();
     console.log(req)
 
-    const result = await mongoClient.db('olive').collection('Student_Profile').findOne({
-        _id: ObjectId(req.query._id)
-    });
-
-    if (result) {
-        let message = { 'message': `Found id '${req.query._id}' in the collection 'Student_Profile'` };
-        console.log(`_id: ${result._id}
-        Display_Name: ${result.Display_Name}`);
-        res.send({
-            ...result,
-            ...message
+    try {
+        const result = await mongoClient.db('olive').collection('Student_Profile').findOne({
+            _id: ObjectId(req.query._id)
         });
-    } else {
+
+        if (result) {
+            let message = { 'message': `Found id '${req.query._id}' in the collection 'Student_Profile'` };
+            console.log(`_id: ${result._id}
+        Display_Name: ${result.Display_Name}`);
+            res.send({
+                ...result,
+                ...message
+            });
+        }
+    } catch (error) {
         let message = { 'message': `No listings found with the id '${req.query._id}' in collection 'Student_Profile'` };
         console.log(message.message);
-        res.send({
-            ...result,
-            ...message
-        });
+        res.send(message);
     }
 });
 
@@ -711,30 +711,31 @@ router.post('/olive/attendance/create', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
+    console.log('-------------------- Attendance --------------------')
     const newList = req.body;
 
     let today = new Date();
     let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
-    console.log(todaystring);
-    for (let i = 0; i < newList.length; i++) {
-        newList[i] = {
-            "Student_Id": newList[i].Student_Id,
-            "Class": {
-                "Id": newList[i].Class.Id,
-                "Date": new Date(todaystring),
-                "Status": false,
-                "EnterTime": "",
-                "ExitTime": ""
-            }
+    console.log('Body:', req.body);
+    // for (let i = 0; i < newList.length; i++) {
+    let data = {
+        "Student_Id": newList.Student_Id,
+        "Class": {
+            "Id": newList.Class.Id,
+            "Date": new Date(todaystring),
+            "Status": false,
+            "EnterTime": "",
+            "ExitTime": ""
         }
-
-        console.log(newList[i]);
     }
-    console.log('====================');
 
-    const result = await mongoClient.db('olive').collection('Attendance').insertMany(newList);
-    console.log('Inserted', result.insertedCount, 'with new list id:');
-    console.log(result.insertedIds);
+    //     console.log(newList[i]);
+    // }
+    // console.log('====================');
+
+    const result = await mongoClient.db('olive').collection('Attendance').insertOne(data);
+    // console.log('Inserted', result.insertedCount, 'with new list id:');
+    // console.log(result.insertedIds);
 
     res.send(result);
 });
@@ -1002,6 +1003,8 @@ router.post('/olive/engagement', async (req, res) => {
     let today = new Date();
     let todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
 
+    console.log(req.body);
+
     const engagement = {
         Student_Id: req.body.Student_Id,
         Class: {
@@ -1081,17 +1084,20 @@ router.put('/olive/engagement/addLog', async (req, res) => {
         "Class.Id": req.query.class,
         Clear: false
     });
+
     console.log(engagement)
 
-    engagement.Interaction_Log.push(log.Interaction_Log);
+    if (engagement != null) {
+        engagement.Interaction_Log.push(log.Interaction_Log);
 
-    const results = await mongoClient.db('olive').collection('Engagement').findOneAndUpdate({
-        _id: engagement._id
-    }, {
-        $set: engagement
-    });
+        const results = await mongoClient.db('olive').collection('Engagement').findOneAndUpdate({
+            _id: engagement._id
+        }, {
+            $set: engagement
+        });
 
-    res.send(results);
+        res.send(results);
+    } else res.send({ 'results': 'No engagement found' })
 });
 
 router.put('/olive/engagement/update', async (req, res) => {
@@ -1629,6 +1635,8 @@ router.get('/olive/emoji/getAll', async (req, res) => {
 router.post('/olive/interact', async (req, res) => {
     await mongoClient.connect();
 
+    console.log('-------------------- Interaction ----------------------')
+
     // let result = { message: `${req.body.Student} | ${req.body.Class} | ${req.body.Type} | ${req.body.Emoji} | ${req.body.Description} | ${req.body.Boolean}` };
     // console.log(result);
     // res.send(result);
@@ -1814,4 +1822,61 @@ router.delete('/olive/emojis/delete', async (req, res) => {
     res.send(result);
 })
 
-app.listen(port, () => console.log(`Now running on port ${port}...`))
+const server = app.listen(port, () => console.log(`Now running on port ${port}...`));
+server.keepAliveTimeout = 0;
+
+const io = socket(server, {
+    cors: {
+        origin: "http://localhost:3001",
+        credentials: true
+    }
+});
+
+var active = [];
+var teacher;
+
+io.on("connection", (socket) => {
+    socket.on('add-user', nuser => {
+
+        if (!active.some((user) => user._id === nuser[0])) {
+            console.log('Enter:', nuser)
+            active.push({
+                _id: nuser[0],
+                role: nuser[1],
+                socket_id: socket.id
+            })
+            if(nuser[1] == 'teacher') {
+                teacher = socket.id;
+            }
+        } else {
+            console.log('already active')
+        }
+        io.emit('get-user', active)
+    });
+
+    socket.on('get-user', () => {
+        console.log('Active:', active)
+    })
+
+    socket.on('remove', () => {
+        console.log('Leave:', socket.id)
+        active = active.filter((user) => user.socket_id !== socket.id);
+    })
+
+    socket.on('send-msg', data => {
+        // console.log('Send:', data)
+        // active.forEach(act => {
+            // console.log('Socket:', act.socket_id)
+            io.emit('msg-recieve', data)
+        // })
+    });
+
+    socket.on('msg-recieve', data => {
+        console.log('Recieve:', data)
+    })
+
+    socket.on('toggle-light', data => {
+        console.log(data)
+        io.emit('cal-light', data)
+    })
+});
