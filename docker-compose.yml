@@ -3,12 +3,13 @@ services:
   olive-backend:
     restart: always
     tty: true
-    # entrypoint: ['node']
-    image: node:18-buster
+    # entrypoint: ['npm', 'start']
+    build: .
     ports:
-      - 43334:3030
+      - 4000:4000
     volumes:
       - /home/anyamaneeama/olive-backend:/app
+
   mongo:
     image: mongo
     ports:
