@@ -1,4 +1,5 @@
 const { mongo, MongoClient, ObjectId } = require('mongodb');
+const moment = require('moment');
 
 require('dotenv').config()
 const express = require('express')
@@ -12,7 +13,7 @@ const router = express.Router();
 const socket = require("socket.io");
 
 // ---------- zoom signature ----------
-  
+
 app.use(bodyParser.json(), cors())
 app.options('*', cors())
 app.use(router)
@@ -24,6 +25,12 @@ app.use(router)
 // Admin
 const url = "mongodb://root:ictoliveict@mongo:27017";
 const mongoClient = new MongoClient(url);
+
+var todayLocal = new Date(
+    new Date().toLocaleString('th-TH', {
+        timeZone: 'Asia/Bangkok',
+    }),
+);
 
 // Get all databases
 router.get('/olive/listDatabases', async (req, res) => {
@@ -46,7 +53,7 @@ router.get('/olive/listDatabases', async (req, res) => {
 router.post('/olive/createCollections', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
- 
+
     const collections = req.body;
 
     collections.forEach(colname => {
@@ -808,7 +815,8 @@ router.get('/olive/attendance/getbyparams', async (req, res) => {
     const results = await mongoClient.db('olive').collection('Attendance').find({
         Student_Id: student,
         "Class.Id": classid,
-        "Class.Date": new Date(classdate)
+        // "Class.Date": new Date(classdate)
+        "Class.Date": classdate
     }).toArray();
 
     if (results.length > 0) {
@@ -882,7 +890,8 @@ router.get('/olive/attendance/getbyClassDate', async (req, res) => {
 
     const results = await mongoClient.db('olive').collection('Attendance').find({
         "Class._id": classid,
-        "Class.Date": new Date(classdate)
+        // "Class.Date": new Date(classdate)
+        "Class.Date": classdate
     }).toArray();
 
     if (results.length > 0) {
@@ -1009,7 +1018,8 @@ router.post('/olive/engagement', async (req, res) => {
 
     console.log('-------------------- Create engagement --------------------')
 
-    let today = new Date();
+    // let today = new Date();
+    let today = todayLocal;
     let todaystring;
     if ((today.getMonth() + 1) > 9) {
         if (today.getDate() > 9) todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
@@ -1019,14 +1029,14 @@ router.post('/olive/engagement', async (req, res) => {
         else todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-0${today.getDate()}`;
     }
 
-
-    console.log(req.body);
+    console.log("Today:", today, todaystring);
 
     const engagement = {
         Student_Id: req.body.Student_Id,
         Class: {
             Id: req.body.Class.Id,
-            Date: new Date(todaystring),
+            // Date: new Date(todaystring),
+            Date: todaystring,
             Engagement: 0
         },
         Interaction_Log: req.body.Interaction_Log,
@@ -1075,7 +1085,8 @@ router.get('/olive/engagement/getbyClassID', async (req, res) => {
 
     let classid = req.query.classid == undefined ? "none" : req.query.classid;
 
-    let today = new Date();
+    // let today = new Date();
+    let today = todayLocal;
     let todaystring;
     if ((today.getMonth() + 1) > 9) {
         if (today.getDate() > 9) todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
@@ -1085,11 +1096,12 @@ router.get('/olive/engagement/getbyClassID', async (req, res) => {
         else todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-0${today.getDate()}`;
     }
 
-    const results = await mongoClient.db('olive').collection('Engagement').findOne({
+    const results = await mongoClient.db('olive').collection('Engagement').find({
         "Class.Id": classid,
-        "Class.Date": new Date(todaystring),
+        // "Class.Date": new Date(todaystring),
+        "Class.Date": todaystring,
         Clear: false
-    });
+    }).toArray();
     console.log(results);
 
     res.send(results);
@@ -1153,17 +1165,17 @@ router.put('/olive/engagement/clear', async (req, res) => {
     await mongoClient.connect();
 
     const oldlog = await mongoClient.db('olive').collection('Engagement')
-        .findOne({
+        .find({ 
             _id: ObjectId(req.query._id)
-        });
+        }).toArray();
 
-    oldlog.Clear = true;
+    oldlog[0].Clear = true;
 
     const results = await mongoClient.db('olive').collection('Engagement')
         .updateOne({
             _id: ObjectId(req.query._id)
-        }, {
-            $set: oldlog
+        }, { 
+            $set: oldlog[0]
         });
 
     res.send(results);
@@ -1519,7 +1531,8 @@ router.get('/olive/class/getbyClassDate', async (req, res) => {
     let classdate = req.query.classdate == undefined ? "" : req.query.classdate;
 
     const results = await mongoClient.db('olive').collection('Attendance').find({
-        Date: new Date(classdate)
+        // Date: new Date(classdate)
+        Date: classdate
     }).toArray();
 
     if (results.length > 0) {
@@ -1583,7 +1596,8 @@ router.put('/olive/class/updateEnter', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
-    let today = new Date();
+    // let today = new Date();
+    let today = todayLocal;
     let todaystring;
     if ((today.getMonth() + 1) > 9) {
         if (today.getDate() > 9) todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
@@ -1594,7 +1608,8 @@ router.put('/olive/class/updateEnter', async (req, res) => {
     }
 
     const updatedList = {
-        "Date": new Date(todaystring),
+        // "Date": new Date(todaystring),
+        "Date": todaystring,
         "Start_time": new Date().getTime()
     };
 
@@ -1686,7 +1701,8 @@ router.post('/olive/interact', async (req, res) => {
     let desc = req.body.Description == undefined ? "" : req.body.Description;
     let bools = req.body.Boolean == undefined ? "" : req.body.Boolean;
 
-    let today = new Date();
+    // let today = new Date(moment().format());
+    let today = todayLocal;
     let todaystring;
     if ((today.getMonth() + 1) > 9) {
         if (today.getDate() > 9) todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
@@ -1695,6 +1711,7 @@ router.post('/olive/interact', async (req, res) => {
         if (today.getDate() > 9) todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
         else todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-0${today.getDate()}`;
     }
+    console.log('Today is', today)
 
     const interaction = {
         Student: student,
@@ -1703,7 +1720,8 @@ router.post('/olive/interact', async (req, res) => {
         Emoji: emoji,
         Description: desc,
         Boolean: bools,
-        Date: new Date(todaystring),
+        // Date: new Date(todaystring),
+        Date: todaystring,
         Time: new Date().getTime()
     };
     console.log(interaction);
@@ -1724,7 +1742,8 @@ router.get('/olive/interact/getAll', async (req, res) => {
 router.get('/olive/interact/getbyType', async (req, res) => {
     await mongoClient.connect();
 
-    let today = new Date();
+    // let today = new Date();
+    let today = todayLocal;
     let todaystring;
     if ((today.getMonth() + 1) > 9) {
         if (today.getDate() > 9) todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
@@ -1737,7 +1756,8 @@ router.get('/olive/interact/getbyType', async (req, res) => {
     const results = await mongoClient.db('olive').collection('Interaction_Log').find({
         Type: req.query.type,
         Class: req.query.classid,
-        Date: new Date(todaystring)
+        // Date: new Date(todaystring)
+        Date: todaystring
     }).sort({ Time: 1 }).toArray();
 
     res.send(results);
@@ -1851,15 +1871,31 @@ router.get('/olive/emojis/getbyClass', async (req, res) => {
 
     console.log('-------------- Get emoji stack ---------------')
 
-    const stack = await mongoClient.db('olive').collection('Emoji_Stack').find({
-        Class: req.query.classid,
-        Clear_stack: false,
-        Date: new Date(req.query.todaystring)
-    }).toArray();
+    try {
+        let today = todayLocal;
+        let todaystring;
+        if ((today.getMonth() + 1) > 9) {
+            if (today.getDate() > 9) todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+            else todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        } else {
+            if (today.getDate() > 9) todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
+            else todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-0${today.getDate()}`;
+        }
 
-    console.log(stack);
+        const stack = await mongoClient.db('olive').collection('Emoji_Stack').find({
+            Class: req.query.classid,
+            Clear_stack: false,
+            // Date: new Date(req.query.todaystring)
+            // Date: req.query.todaystring
+            Date: todaystring
+        }).toArray();
 
-    res.send(stack);
+        console.log(stack);
+
+        res.send(stack);
+    } catch {
+        // 
+    }
 });
 
 // append emoji
@@ -1869,31 +1905,46 @@ router.put('/olive/emojis/add', async (req, res) => {
     console.log('-------------------- Add emoji --------------------')
 
     const emojis = req.body;
-    console.log(emojis)
+    console.log(req.query._id, emojis)
 
     const stack = await mongoClient.db('olive').collection('Emoji_Stack').findOne({
         _id: ObjectId(req.query._id)
     });
 
-    stack.Emoji.push(emojis.Emoji);
-    console.log(stack.Emoji);
+    console.log('Old:', stack)
 
-    res.send(stack);
+    stack.Emoji.push(emojis.Emoji);
+    console.log('New:', stack);
+
+    const result = await mongoClient.db('olive').collection('Emoji_Stack').updateOne({
+        _id: ObjectId(req.query._id)
+    }, {
+        $set: stack
+    })
+
+    res.send(result);
 });
 
 // clear stack
 router.put('/olive/emojis/clear', async (req, res) => {
     await mongoClient.connect();
 
-    const result = await mongoClient.db('olive').collection('Emoji_Stack').updateOne({
-        _id: ObjectId(req.query._id)
-    },
-        {
-            $set: { "Clear_stack": true }
-        });
-    console.log(result);
+    console.log('------------ Clear stack -------------')
+    try {
+        const result = await mongoClient.db('olive').collection('Emoji_Stack').updateOne({
+            _id: ObjectId(req.query._id)
+        },
+            {
+                $set: { "Clear_stack": true }
+            });
+        console.log(result);
 
-    res.send(result);
+        res.send(result);
+    } catch {
+        // 
+    }
+
+
 });
 
 router.delete('/olive/emojis/delete', async (req, res) => {
@@ -1925,7 +1976,7 @@ const io = socket(server, {
 });
 
 var active = [];
-var teacher;
+var teacher = [];
 
 io.on("connection", (socket) => {
     socket.on('add-user', nuser => {
@@ -1938,7 +1989,7 @@ io.on("connection", (socket) => {
                 socket_id: socket.id
             })
             if (nuser[1] == 'teacher') {
-                teacher = socket.id;
+                teacher.push(socket.id);
             }
         } else {
             console.log('already active')
@@ -1957,6 +2008,7 @@ io.on("connection", (socket) => {
 
     socket.on('send-msg', data => {
         io.emit('msg-recieve', data)
+        // io.to(teacher).emit('get-interact', data)
     });
 
     socket.on('msg-recieve', data => {
@@ -1964,16 +2016,27 @@ io.on("connection", (socket) => {
     });
 
     socket.on('send-emo', data => {
-        io.to(teacher).emit('emo-recieve', data)
-    });
+        console.log('Send EMO')
+        teacher.forEach(t => {
+            io.to(t).emit('emo-recieve', data)
+        })
+        
+        // io.to(teacher).emit('get-interact', data)
+    }); 
 
     socket.on('emo-recieve', data => {
         // console.log('Recieve:', data)
     });
 
+    socket.on('send-interact', data => {
+        console.log('Send interaction', data)
+        // io.to(teacher).emit('get-interact', data)
+    });
+
     socket.on('toggle-light', data => {
         // console.log(data)
         io.emit('cal-light', data)
+        // io.to(teacher).emit('get-interact', data)
     });
 
     socket.on('cal-light', data => {

@@ -5,7 +5,7 @@ mongodb/collection-2--1834820940250460233.wt
 mongodb/collection-2--7175670317229240424.wt
 mongodb/collection-4--1834820940250460233.wt
 mongodb/collection-4--7175670317229240424.wt
-mongodb/collection-5--1834820940250460233.wt
+mongodb/collection-5--1834820940250460233.wta 
 mongodb/collection-6--1834820940250460233.wt
 mongodb/collection-7--1834820940250460233.wt
 mongodb/collection-7--7175670317229240424.wt
@@ -1157,10 +1157,11 @@ node_modules/vary/LICENSE
 node_modules/vary/package.json
 node_modules/vary/README.md
 mongodb/collection-28--1834820940250460233.wt
-.gitignore
 mongodb/index-29--1834820940250460233.wt
 mongodb/index-31--1834820940250460233.wt
 mongodb/collection-30--1834820940250460233.wt
 mongodb/collection-0--1467826927962220876.wt
-.gitignore
 mongodb/index-1--1467826927962220876.wt
+
+node_modules
+mongodb
