@@ -1,16 +1,27 @@
 const { mongo, MongoClient, ObjectId } = require('mongodb');
 const moment = require('moment');
 
-require('dotenv').config()
+require('dotenv').config() 
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const port = 4000
 const app = express()
+
+const http = require('http').createServer(app);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: "http://localhost:3000",
+        credentials: true
+    }
+});
+
 const router = express.Router();
 
-const socket = require("socket.io");
+// const socket = require("socket.io");
+
+
 
 // ---------- zoom signature ----------
 
@@ -1083,6 +1094,8 @@ router.get('/olive/engagement/getbyClassID', async (req, res) => {
     // 
     await mongoClient.connect();
 
+    console.log('-------------- Get Engagement -----------------')
+
     let classid = req.query.classid == undefined ? "none" : req.query.classid;
 
     // let today = new Date();
@@ -1102,6 +1115,7 @@ router.get('/olive/engagement/getbyClassID', async (req, res) => {
         "Class.Date": todaystring,
         Clear: false
     }).toArray();
+
     console.log(results);
 
     res.send(results);
@@ -1111,28 +1125,44 @@ router.put('/olive/engagement/addLog', async (req, res) => {
     // 
     await mongoClient.connect();
 
-    console.log('------------------- Add log ------------------')
+    let today = todayLocal;
+    let todaystring;
+    if ((today.getMonth() + 1) > 9) {
+        if (today.getDate() > 9) todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        else todaystring = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    } else {
+        if (today.getDate() > 9) todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
+        else todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-0${today.getDate()}`;
+    }
+
+    console.log('------------------- Add engagement log ------------------')
     const log = req.body;
 
     const engagement = await mongoClient.db('olive').collection('Engagement').findOne({
         Student_Id: req.query.student,
         "Class.Id": req.query.class,
+        "Class.Date": todaystring,
         Clear: false
     });
 
-    console.log(engagement)
+    console.log('Old:', engagement)
 
     if (engagement != null) {
         engagement.Interaction_Log.push(log.Interaction_Log);
 
-        const results = await mongoClient.db('olive').collection('Engagement').findOneAndUpdate({
+        console.log('New:', engagement)
+
+        const results = await mongoClient.db('olive').collection('Engagement').updateOne({
             _id: engagement._id
         }, {
             $set: engagement
         });
 
         res.send(results);
-    } else res.send({ 'results': 'No engagement found' })
+    } else {
+        console.log('Req:', req.query, req.body, todaystring)
+        res.send({ 'results': 'No engagement found' })
+    }
 });
 
 router.put('/olive/engagement/update', async (req, res) => {
@@ -1141,44 +1171,53 @@ router.put('/olive/engagement/update', async (req, res) => {
 
     const log = req.body;
 
-    const oldlog = await mongoClient.db('olive').collection('Engagement')
-        .findOne({
-            _id: ObjectId(req.query._id)
-        });
+    try {
+        const oldlog = await mongoClient.db('olive').collection('Engagement')
+            .findOne({
+                _id: ObjectId(req.query._id)
+            });
 
-    oldlog.Class.Engagement = log.Class.Engagement;
+        oldlog.Class.Engagement = log.Class.Engagement;
 
-    const results = await mongoClient.db('olive').collection('Engagement')
-        .updateOne({
-            // Student_Id: req.query.student,
-            // "Class.Id": req.query.class
-            _id: ObjectId(req.query._id)
-        }, {
-            $set: oldlog
-        });
+        const results = await mongoClient.db('olive').collection('Engagement')
+            .updateOne({
+                // Student_Id: req.query.student,
+                // "Class.Id": req.query.class
+                _id: ObjectId(req.query._id)
+            }, {
+                $set: oldlog
+            });
 
-    res.send(results);
+        res.send(results);
+    } catch {
+
+    }
 });
 
 router.put('/olive/engagement/clear', async (req, res) => {
     // 
     await mongoClient.connect();
 
-    const oldlog = await mongoClient.db('olive').collection('Engagement')
-        .find({ 
-            _id: ObjectId(req.query._id)
-        }).toArray();
+    try {
+        const oldlog = await mongoClient.db('olive').collection('Engagement')
+            .find({
+                _id: ObjectId(req.query._id)
+            }).toArray();
 
-    oldlog[0].Clear = true;
+        oldlog[0].Clear = true;
 
-    const results = await mongoClient.db('olive').collection('Engagement')
-        .updateOne({
-            _id: ObjectId(req.query._id)
-        }, { 
-            $set: oldlog[0]
-        });
 
-    res.send(results);
+        const results = await mongoClient.db('olive').collection('Engagement')
+            .updateOne({
+                _id: ObjectId(req.query._id)
+            }, {
+                $set: oldlog[0]
+            });
+
+        res.send(results);
+    } catch {
+        // 
+    }
 });
 
 router.delete('/olive/engagement/deletebyId', async (req, res) => {
@@ -1711,7 +1750,7 @@ router.post('/olive/interact', async (req, res) => {
         if (today.getDate() > 9) todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-${today.getDate()}`;
         else todaystring = `${today.getFullYear()}-0${today.getMonth() + 1}-0${today.getDate()}`;
     }
-    console.log('Today is', today)
+    // console.log('Today is', today)
 
     const interaction = {
         Student: student,
@@ -1737,6 +1776,17 @@ router.get('/olive/interact/getAll', async (req, res) => {
     const results = await mongoClient.db('olive').collection('Interaction_Log').find({}).toArray();
 
     res.send(results);
+});
+
+router.get('/olive/interact/getbyId', async (req, res) => {
+    await mongoClient.connect();
+
+    const result = await mongoClient.db('olive').collection('Interaction_Log').findOne({
+        _id: ObjectId(req.query._id)
+    });
+    console.log(result);
+
+    res.send(result);
 });
 
 router.get('/olive/interact/getbyType', async (req, res) => {
@@ -1818,14 +1868,18 @@ router.delete('/olive/interact/deletebyId', async (req, res) => {
     // Connect mongodb
     await mongoClient.connect();
 
-    const result = await mongoClient.db('olive').collection('Interaction_Log')
-        .deleteOne({
-            _id: ObjectId(req.query._id)
-        });
+    try {
+        const result = await mongoClient.db('olive').collection('Interaction_Log')
+            .deleteOne({
+                _id: ObjectId(req.query._id)
+            });
 
-    if (result.matchedCount > 0) {
-        res.send(result);
-    } else res.send(result);
+        if (result.matchedCount > 0) {
+            res.send(result);
+        } else res.send(result);
+    } catch {
+        // 
+    }
 });
 
 // Emoji_Stack
@@ -1965,15 +2019,15 @@ router.delete('/olive/emojis/deleteAll', async (req, res) => {
     res.send(result);
 });
 
-const server = app.listen(port, () => console.log(`Now running on port ${port}...`));
+const server = http.listen(port, () => console.log(`Now running on port ${port}...`));
 server.keepAliveTimeout = 0;
 
-const io = socket(server, {
-    cors: {
-        origin: "http://localhost:3000",
-        credentials: true
-    }
-});
+// const io = socket(server, {
+//     cors: { 
+//         origin: "http://localhost:3000",
+//         credentials: true
+//     }
+// });
 
 var active = [];
 var teacher = [];
@@ -1990,6 +2044,7 @@ io.on("connection", (socket) => {
             })
             if (nuser[1] == 'teacher') {
                 teacher.push(socket.id);
+                console.log('Teacher active:', teacher)
             }
         } else {
             console.log('already active')
@@ -1999,6 +2054,7 @@ io.on("connection", (socket) => {
 
     socket.on('get-user', () => {
         console.log('Active:', active)
+        // console.log('Teacher active:', teacher)
     });
 
     socket.on('remove-user', () => {
@@ -2016,21 +2072,24 @@ io.on("connection", (socket) => {
     });
 
     socket.on('send-emo', data => {
-        console.log('Send EMO')
+        // console.log('****************** Send Emoji ********************')
         teacher.forEach(t => {
             io.to(t).emit('emo-recieve', data)
         })
-        
+
         // io.to(teacher).emit('get-interact', data)
-    }); 
+    });
 
     socket.on('emo-recieve', data => {
         // console.log('Recieve:', data)
     });
 
     socket.on('send-interact', data => {
-        console.log('Send interaction', data)
-        // io.to(teacher).emit('get-interact', data)
+        console.log('****************** Send interaction ********************')
+        teacher.forEach(t => {
+            io.to(t).emit('get-interact', data)
+        });
+
     });
 
     socket.on('toggle-light', data => {
