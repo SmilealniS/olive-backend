@@ -7,6 +7,7 @@ services:
     build: .
     ports:
       - 4000:4000
+      - 8000:8000
     volumes:
       - /home/anyamaneeama/olive-backend:/app
 

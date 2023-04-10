@@ -1,7 +1,7 @@
 {
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon olive-service.js"
+    "start": "node zoom-service.js & nodemon olive-service.js"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

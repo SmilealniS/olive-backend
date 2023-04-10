@@ -6,7 +6,7 @@ const cors = require('cors')
 const KJUR = require('jsrsasign');
 
 const app = express()
-const port = process.env.PORT || 4000
+const port = 8000
 
 // ---------- zoom signature ----------
 
@@ -14,6 +14,8 @@ app.use(bodyParser.json(), cors())
 app.options('*', cors())
 
 app.post('/', (req, res) => {
+
+    console.log('someone here')
 
     const iat = Math.round(new Date().getTime() / 1000) - 30;
     const exp = iat + 60 * 60 * 2
@@ -34,11 +36,13 @@ app.post('/', (req, res) => {
     const sPayload = JSON.stringify(oPayload)
     const signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, process.env.ZOOM_SDK_SECRET)
 
+    console.log(signature);
+
     res.json({
         signature: signature
     })
 
-    console.log(res);
+    
 })
 
 app.listen(port, () => console.log(`Now running on port ${port}...`));
