@@ -1,7 +1,7 @@
 const { mongo, MongoClient, ObjectId } = require('mongodb');
 const moment = require('moment');
 
-require('dotenv').config() 
+require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -1171,18 +1171,26 @@ router.put('/olive/engagement/update', async (req, res) => {
 
     const log = req.body;
 
+    console.log('------------ Update engagement ----------------')
+
+    console.log('Engagement', log)
+
     try {
         const oldlog = await mongoClient.db('olive').collection('Engagement')
             .findOne({
                 _id: ObjectId(req.query._id)
             });
 
+        console.log('Old:', oldlog)
+
         oldlog.Class.Engagement = log.Class.Engagement;
+
+        console.log('New:', oldlog)
 
         const results = await mongoClient.db('olive').collection('Engagement')
             .updateOne({
                 // Student_Id: req.query.student,
-                // "Class.Id": req.query.class
+                // "Class.Id": req.query.class 
                 _id: ObjectId(req.query._id)
             }, {
                 $set: oldlog
@@ -2019,18 +2027,24 @@ router.delete('/olive/emojis/deleteAll', async (req, res) => {
     res.send(result);
 });
 
+router.get('/active-users', (req, res) => {
+    res.send(student);
+});
+
+
 const server = http.listen(port, () => console.log(`Now running on port ${port}...`));
 server.keepAliveTimeout = 0;
-
+ 
 // const io = socket(server, {
 //     cors: { 
 //         origin: "http://localhost:3000",
 //         credentials: true
 //     }
 // });
-
+ 
 var active = [];
 var teacher = [];
+var student = [];
 
 io.on("connection", (socket) => {
     socket.on('add-user', nuser => {
@@ -2045,6 +2059,8 @@ io.on("connection", (socket) => {
             if (nuser[1] == 'teacher') {
                 teacher.push(socket.id);
                 console.log('Teacher active:', teacher)
+            } else {
+                student.push(nuser[0])
             }
         } else {
             console.log('already active')
@@ -2055,11 +2071,6 @@ io.on("connection", (socket) => {
     socket.on('get-user', () => {
         console.log('Active:', active)
         // console.log('Teacher active:', teacher)
-    });
-
-    socket.on('remove-user', () => {
-        console.log('Leave:', socket.id)
-        active = active.filter((user) => user.socket_id !== socket.id);
     });
 
     socket.on('send-msg', data => {
