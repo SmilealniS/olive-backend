@@ -900,7 +900,7 @@ router.get('/olive/attendance/getbyClassDate', async (req, res) => {
     let classid = req.query.classid == undefined ? "" : req.query.classid;
 
     const results = await mongoClient.db('olive').collection('Attendance').find({
-        "Class._id": classid,
+        "Class.Id": classid,
         // "Class.Date": new Date(classdate)
         "Class.Date": classdate
     }).toArray();
@@ -918,14 +918,14 @@ router.get('/olive/attendance/getbyClassDate', async (req, res) => {
             Class End: ${result.Class.ExitTime}`);
         });
         res.send({
-            ...results,
+            ...{ result: results },
             ...message
         });
     } else {
-        let message = { 'message': `No listings found with Class Date(${req.query.classdate})` };
+        let message = { 'message': `No listings found with Student_Profile(${req.query.student})` };
         console.log(message.message);
         res.send({
-            ...results,
+            ...{ result: results },
             ...message
         });
     }
