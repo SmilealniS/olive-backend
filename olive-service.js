@@ -2059,7 +2059,7 @@ io.on("connection", (socket) => {
             if (nuser[1] == 'teacher') {
                 teacher.push(socket.id);
                 console.log('Teacher active:', teacher)
-            } else {
+            } else if(nuser[1] == 'student') {
                 student.push(nuser[0])
             }
         } else {
