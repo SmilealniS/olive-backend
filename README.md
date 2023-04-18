@@ -1,6 +1,6 @@
 # Olive backend service
 
-This is a backend service designed to provide [insert purpose of the service]. The service is built using [insert programming language] and [insert framework or libraries used]. 
+This is a backend service designed to provide socket connection and mongo database management for Olive web application.
 
 ## Getting Started
 
