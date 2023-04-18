@@ -1,37 +1,38 @@
-# Olive Web Application
+# Olive backend service
 
-This is a web application built using the React JavaScript library. The application is designed to [insert purpose of the application here].
+This is a backend service designed to provide [insert purpose of the service]. The service is built using [insert programming language] and [insert framework or libraries used]. 
 
 ## Getting Started
 
-To get started with the application, follow these steps:
+To get started with the service, follow these steps:
 
 1. Clone the repository to your local machine.
 2. Run `npm install` to install the necessary dependencies.
-3. Run `npm start` to start the development server.
+3. Run `npm start` to start the service.
 
 ## Usage
 
-To use the application, please run together with Olive frontend service. 
+To use the service, please use this together with Olive frontend service. 
 
-## Features
+## API Endpoints
 
-The application includes the following features:
+The following API endpoints are available:
 
-- [Feature 1]
-- [Feature 2]
-- [Feature 3]
+- [Endpoint 1]
+- [Endpoint 2]
+- [Endpoint 3]
 
 ## Technologies Used
 
-The application was built using the following technologies:
+The service was built using the following technologies:
 
-- React
+- [Programming language]
+- [Framework or libraries used]
 - [Other technologies used]
 
 ## Contributing
 
-Contributions to the application are welcome. If you find any issues or would like to contribute to the development of the application, please follow the steps below:
+Contributions to the service are welcome. If you find any issues or would like to contribute to the development of the service, please follow the steps below:
 
 1. Fork the repository.
 2. Create a new branch for your changes.
@@ -40,4 +41,4 @@ Contributions to the application are welcome. If you find any issues or would li
 
 ## License
 
-The application is licensed under the NPM team.
+The service is licensed under the NPM team.
