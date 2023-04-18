@@ -14,22 +14,6 @@ To get started with the service, follow these steps:
 
 To use the service, please use this together with Olive frontend service. 
 
-## API Endpoints
-
-The following API endpoints are available:
-
-- [Endpoint 1]
-- [Endpoint 2]
-- [Endpoint 3]
-
-## Technologies Used
-
-The service was built using the following technologies:
-
-- [Programming language]
-- [Framework or libraries used]
-- [Other technologies used]
-
 ## Contributing
 
 Contributions to the service are welcome. If you find any issues or would like to contribute to the development of the service, please follow the steps below:
