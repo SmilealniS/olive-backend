@@ -38,9 +38,9 @@ const url = "mongodb://root:ictoliveict@mongo:27017";
 const mongoClient = new MongoClient(url);
 
 var todayLocal = new Date(
-    new Date().toLocaleString('th-TH', {
-        timeZone: 'Asia/Bangkok',
-    }),
+    // new Date().toLocaleString('th-TH', {
+    //     timeZone: 'Asia/Bangkok',
+    // }),
 );
 
 // Get all databases
@@ -2084,9 +2084,10 @@ io.on("connection", (socket) => {
 
     socket.on('send-emo', data => {
         // console.log('****************** Send Emoji ********************')
-        teacher.forEach(t => {
-            io.to(t).emit('emo-recieve', data)
-        })
+        // teacher.forEach(t => {
+        //     io.to(t).emit('emo-recieve', data)
+        // })
+        io.emit('emo-recieve', data);
 
         // io.to(teacher).emit('get-interact', data)
     });
@@ -2097,10 +2098,10 @@ io.on("connection", (socket) => {
 
     socket.on('send-interact', data => {
         console.log('****************** Send interaction ********************')
-        teacher.forEach(t => {
-            io.to(t).emit('get-interact', data)
-        });
-
+        // teacher.forEach(t => {
+        //     io.to(t).emit('get-interact', data)
+        // });
+        io.emit('get-interact', data);
     });
 
     socket.on('toggle-light', data => {
