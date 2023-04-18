@@ -12,7 +12,7 @@ To get started with the service, follow these steps:
 
 ## Usage
 
-To use the service, please use this together with Olive frontend service. 
+To use the service, please use this together with Olive frontend service (https://github.com/SmilealniS/olive-frontend.git). 
 
 ## Contributing
 
