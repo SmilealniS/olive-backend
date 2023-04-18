@@ -1,4 +1,4 @@
-# Olive backend service
+# OLIVE backend service
 
 This is a backend service designed to provide socket connection and mongo database management for Olive web application.
 
