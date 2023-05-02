@@ -1,39 +1,3 @@
-// // Requiring module
-// const express = require('express')
-// const cors = require('cors')
-
-// // Creating express app
-// const app = express()
-// app.set('baseUrl', 'https://3dddfdaadb14.ngrok.app');
-
-// // enabling CORS for some specific origins only.
-// let corsOptions = {
-//    origin : ['https://90acce2ace74.ngrok.app'],
-// }
-
-// app.use(cors(corsOptions))
-
-// // sample api routes for testing
-// app.get('/',(req, res) => {
-//    res.json("welcome to our server")
-// });
-
-// app.get('/secret', cors(corsOptions) , (req, res) => {
-//    const secret =  Math.floor(Math.random()*100)
-//    res.json({secret})
-// });
-
-// // Port Number
-// const port = 4000;
-
-// // Server setup
-// app.listen(port, () => {
-//    console.log(`Test server running on port ${port}.`)
-// });
-
-
-// Backup OLIVE
-
 const { mongo, MongoClient, ObjectId } = require('mongodb');
 const moment = require('moment');
 
@@ -66,24 +30,22 @@ app.use(cors({
 
 const fs = require('fs');
 
-// const options = {
-//     key: fs.readFileSync('server.key'),
-//     cert: fs.readFileSync('server.cert')
-// };
+const options = {
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+};
 
 // const http = require('https').createServer(options, app);
 
-const http = require('http').createServer(app);
-const io = require('socket.io')(http, {
+// const http = require('http').createServer(app);
+const io = require('socket.io')(app, {
     cors: {
         // origin: "http://olive.northanapon.com",
         origin: "https://90acce2ace74.ngrok.app",
         methods: ["GET", "POST", "PUT"],
         // allowedHeaders: ["my-custom-header"],
         credentials: true
-    },
-    pingTimeout: 15000,
-    pingInterval: 20000
+    }
 });
 
 const router = express.Router();
@@ -106,7 +68,7 @@ var todayLocal = new Date(
     // new Date().toLocaleString('th-TH', {
     //     timeZone: 'Asia/Bangkok',
     // }),
-); 
+);
 
 // Get all databases
 router.get('/olive/listDatabases', async (req, res) => {
@@ -297,7 +259,7 @@ router.get('/olive/identity/getbyParams', async (req, res) => {
             Username: ${result.Username}
             Password: ${result.Password}
             Teacher_Profile: ${result.Teacher_Profile}
-            Admin_Profile: ${result.Admin_Profile} 
+            Admin_Profile: ${result.Admin_Profile}
             Student_Profile: ${result.Student_Profile}`
         });
         res.send({
@@ -364,12 +326,15 @@ router.post('/', async (req, res) => {
         const result = req.body.password === user.Password;
 
         if (result) {
-            if (user.Teacher_Profile == '') {
+            if (user.Teacher_Profile == '' && user.Admin_Profile == '') {
                 res.status(200).send({
                     ...user,
                     ...{ role: 'student' }
                 });
-            }
+            } else if (user.Teacher_Profile == '') res.status(200).send({
+                ...user,
+                ...{ role: 'admin' }
+            });
             else res.status(200).send({
                 ...user,
                 ...{ role: 'teacher' }
@@ -1508,9 +1473,8 @@ router.post('/olive/class/create', async (req, res) => {
             "Meeting_number": newList[i].Meeting_number,
             "Password": newList[i].Password,
             "Teacher": newList[i].Teacher,
-            // "Admin": newList[i].Admin,
-            // "Class": []
-            "Description": newList[i].Description
+            "Admin": newList[i].Admin,
+            "Class": []
         }
 
         console.log(newList[i]);
@@ -2096,7 +2060,7 @@ router.get('/active-users', (req, res) => {
 });
 
 
-const server = http.listen(port, () => console.log(`Now running on port ${port}...`));
+const server = app.listen(port, () => console.log(`Now running on port ${port}...`));
 server.keepAliveTimeout = 0;
 
 // const io = socket(server, {
@@ -2109,7 +2073,6 @@ server.keepAliveTimeout = 0;
 var active = [];
 var teacher = [];
 var student = [];
-var chats = [];
 
 io.on("connection", (socket) => {
     socket.on('add-user', nuser => {
@@ -2122,10 +2085,10 @@ io.on("connection", (socket) => {
                 socket_id: socket.id
             })
             if (nuser[1] == 'teacher') {
-                if(!teacher.some((user) => user === nuser[0])) teacher.push(socket.id);
+                teacher.push(socket.id);
                 console.log('Teacher active:', teacher)
             } else if (nuser[1] == 'student') {
-                if(!student.some((user) => user === nuser[0])) student.push(nuser[0])
+                student.push(nuser[0])
             }
         } else {
             console.log('already active')
@@ -2133,25 +2096,12 @@ io.on("connection", (socket) => {
         io.emit('get-user', active)
     });
 
-    socket.on('disconnect', () => {
-        console.log(`User ${socket.id} disconnected`);
-    
-        // Remove the disconnected user from the active list
-        active = active.filter(user => user.socket_id !== socket.id);
-    
-        // Remove the disconnected user from the student list
-        student = student.filter(user => user.socket_id !== socket.id); 
-    
-        io.emit('get-user', active);
-    }); 
-
-    socket.on('get-user', () => {  
+    socket.on('get-user', () => {
         console.log('Active:', active)
         // console.log('Teacher active:', teacher)
     });
 
     socket.on('send-msg', data => {
-        chats.push(data)
         io.emit('msg-recieve', data)
         // io.to(teacher).emit('get-interact', data)
     });
@@ -2159,7 +2109,7 @@ io.on("connection", (socket) => {
     socket.on('msg-recieve', data => {
         // console.log('Recieve:', data)
     });
- 
+
     socket.on('send-emo', data => {
         // console.log('****************** Send Emoji ********************')
         // teacher.forEach(t => {
