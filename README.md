@@ -26,3 +26,14 @@ Contributions to the service are welcome. If you find any issues or would like t
 ## License
 
 The service is licensed under the NPM team.
+
+## Citation
+
+@inproceedings{papoutsaki2016webgazer,
+  author = {Alexandra Papoutsaki and Patsorn Sangkloy and James Laskey and Nediyana Daskalova and Jeff Huang and James Hays},
+  title = {WebGazer: Scalable Webcam Eye Tracking Using User Interactions},
+  booktitle = {Proceedings of the 25th International Joint Conference on Artificial Intelligence (IJCAI)},
+  pages = {3839--3845},
+  year = {2016},
+  organization={AAAI}
+}
