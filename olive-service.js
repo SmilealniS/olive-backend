@@ -1,39 +1,3 @@
-// // Requiring module
-// const express = require('express')
-// const cors = require('cors')
-
-// // Creating express app
-// const app = express()
-// app.set('baseUrl', 'https://3dddfdaadb14.ngrok.app');
-
-// // enabling CORS for some specific origins only.
-// let corsOptions = {
-//    origin : ['https://90acce2ace74.ngrok.app'],
-// }
-
-// app.use(cors(corsOptions))
-
-// // sample api routes for testing
-// app.get('/',(req, res) => {
-//    res.json("welcome to our server")
-// });
-
-// app.get('/secret', cors(corsOptions) , (req, res) => {
-//    const secret =  Math.floor(Math.random()*100)
-//    res.json({secret})
-// });
-
-// // Port Number
-// const port = 4000;
-
-// // Server setup
-// app.listen(port, () => {
-//    console.log(`Test server running on port ${port}.`)
-// });
-
-
-// Backup OLIVE
-
 const { mongo, MongoClient, ObjectId } = require('mongodb');
 const moment = require('moment');
 
@@ -43,43 +7,24 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const port = 4000
-const app = express()
+const app = express() 
 
-// app.set('baseUrl', 'http://olive-api.northanapon.com');
-app.set('baseUrl', 'https://3dddfdaadb14.ngrok.app');
-
-// app.use((req, res, next) => {
-//     // res.setHeader('Access-Control-Allow-Origin', 'https://90acce2ace74.ngrok.app');
-//     res.setHeader('Access-Control-Allow-Origin', '*');
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-//     res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     res.setHeader('Access-Control-Allow-Credentials', 'true');
-//     next();
-// });
+app.set('baseUrl', 'https://f44045450915.ngrok.app');
 
 app.use(bodyParser.json(), cors())
 app.options('*', cors())
 app.use(cors({
-    origin: 'https://90acce2ace74.ngrok.app',
+    origin: 'https://0fe210e661e9.ngrok.app',
     credentials: true
 }));
 
 const fs = require('fs');
 
-// const options = {
-//     key: fs.readFileSync('server.key'),
-//     cert: fs.readFileSync('server.cert')
-// };
-
-// const http = require('https').createServer(options, app);
-
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        // origin: "http://olive.northanapon.com",
-        origin: "https://90acce2ace74.ngrok.app",
+        origin: "https://0fe210e661e9.ngrok.app",
         methods: ["GET", "POST", "PUT"],
-        // allowedHeaders: ["my-custom-header"],
         credentials: true
     },
     pingTimeout: 15000,
@@ -87,10 +32,6 @@ const io = require('socket.io')(http, {
 });
 
 const router = express.Router();
-
-// const socket = require("socket.io");
-
-
 
 app.use(router)
 
@@ -1354,7 +1295,7 @@ router.get('/olive/enroll/getbyClassID', async (req, res) => {
 });
 
 router.post('/redirect', (req, res) => {
-    res.status(301).redirect(`https://90acce2ace74.ngrok.app/${req.query.rp}`)
+    res.status(301).redirect(`https://0fe210e661e9.ngrok.app/${req.query.rp}`)
 });
 
 router.get('/olive/enroll/getbyStudentID', async (req, res) => {
@@ -2094,7 +2035,6 @@ router.delete('/olive/emojis/deleteAll', async (req, res) => {
 router.get('/active-users', (req, res) => {
     res.send(student);
 });
-
 
 const server = http.listen(port, () => console.log(`Now running on port ${port}...`));
 server.keepAliveTimeout = 0;

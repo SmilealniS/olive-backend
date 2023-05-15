@@ -11,7 +11,7 @@ To get started with the service, follow these steps:
 3. Run `npm start` to start the service.
 
 ## Usage
-
+ 
 To use the service, please use this together with Olive frontend service (https://github.com/SmilealniS/olive-frontend.git). 
 
 ## Contributing

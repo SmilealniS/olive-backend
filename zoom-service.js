@@ -7,17 +7,7 @@ const KJUR = require('jsrsasign');
 
 const app = express()
 
-// app.set('baseUrl', 'http://olive-zoom.northanapon.com');
-app.set('baseUrl', 'https://e113342c1f56.ngrok.app');
-
-// app.use((req, res, next) => {
-//     res.setHeader('Access-Control-Allow-Origin', 'https://90acce2ace74.ngrok.app');
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-//     res.setHeader('Access-Control-Allow-Credentials', 'true');
-//     next();
-// });
-
+app.set('baseUrl', 'https://9e2a62b42c94.ngrok.app');
 
 const port = 8000
 
@@ -26,7 +16,7 @@ const port = 8000
 app.use(bodyParser.json(), cors())
 app.options('*', cors())
 app.use(cors({
-    origin: 'https://90acce2ace74.ngrok.app',
+    origin: 'https://0fe210e661e9.ngrok.app',
     credentials: true
 }));
 
